@@ -1,0 +1,24 @@
+version: '3'
+services:
+  provenance-server:
+    image: provenance-server:latest
+    build:
+      context: ../server/
+    ports:
+      - 8080:8080
+    environment:
+      org_mipams_core_image_folder: "/app/assets"
+      org_mipams_fake_media_demo_encSecret: "17bccfb498595c425c2833135315611f1abf1f58f507666f66761d43236bb384"
+      org_mipams_fake_media_demo_encScheme: "AES-256"
+  # provenance-client:
+  #   image: provenance-client:latest
+  #   build:
+  #     context: ../client/
+  #   volumes:
+  #     - '../client:/app'
+  #   ports:
+  #     - 3001:3000
+  #   environment:
+  #     - CHOKIDAR_USEPOLLING=true
+  #   depends_on:
+  #     - provenance-server

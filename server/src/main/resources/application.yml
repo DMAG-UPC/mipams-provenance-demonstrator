@@ -1,0 +1,23 @@
+spring:
+  main:
+    allow-circular-references: true
+  jwt:
+    jwtSecret: igoApplication
+    jwtExpirationMs: 86400000
+logging:
+  level:
+    org:
+      mipams:
+        jumbf:
+          core: INFO
+          privsec: INFO
+        fake_media: INFO
+org:
+  mipams:
+    core:
+      max_file_size_in_bytes: 52428800 # Maximum size per file uploaded: 50 MB
+      image_folder: /home/nikos/Desktop/demo
+    fake_media:
+      demo:
+        encSecret: "17bccfb498595c425c2833135315611f1abf1f58f507666f66761d43236bb384"
+        encScheme: "AES-256"
