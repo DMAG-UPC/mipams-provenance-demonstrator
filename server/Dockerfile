@@ -4,7 +4,17 @@ RUN addgroup -S mipams && adduser -S mipams -G mipams
 
 WORKDIR /app
 RUN mkdir /app/assets
+RUN mkdir /app/credentials
 RUN chown -R mipams:mipams /app/assets
+RUN chown -R mipams:mipams /app/credentials
+
+RUN apk upgrade --update-cache --available && \
+    apk add openssl && \
+    rm -rf /var/cache/apk/*
+
+COPY ./generateCredentials.sh /app/credentials/generateCredentials.sh
+RUN chown -R mipams:mipams /app/credentials
+RUN chmod +x /app/credentials/generateCredentials.sh
 
 USER mipams:mipams
 VOLUME /tmp

@@ -1,5 +1,6 @@
 package org.mipams.fake_media.demo.config;
 
+import org.mipams.fake_media.demo.services.UserInitializer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
@@ -19,61 +20,64 @@ import org.springframework.stereotype.Component;
 @EnableGlobalMethodSecurity(prePostEnabled = true)
 public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
-    public static final String AUTHORITIES_CLAIM_NAME = "roles";
+        public static final String AUTHORITIES_CLAIM_NAME = "roles";
 
-    @Autowired
-    PasswordEncoder passwordEncoder;
+        @Autowired
+        PasswordEncoder passwordEncoder;
 
-    @Autowired
-    private JwtRequestFilter jwtRequestFilter;
+        @Autowired
+        private JwtRequestFilter jwtRequestFilter;
 
-    @Autowired
-    JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
+        @Autowired
+        JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
 
-    @Override
-    protected void configure(HttpSecurity http) throws Exception {
-        http.cors()
-                .and().exceptionHandling().authenticationEntryPoint(jwtAuthenticationEntryPoint).and()
-                .csrf().disable()
-                .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-                .and()
-                .authorizeRequests(configurer -> configurer
-                        .antMatchers(
-                                "/error",
-                                "/login")
-                        .permitAll()
-                        .anyRequest()
-                        .authenticated());
+        @Autowired
+        UserInitializer userInitializer;
 
-        http.addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class);
-        http.headers().cacheControl();
-    }
+        @Override
+        protected void configure(HttpSecurity http) throws Exception {
+                http.cors()
+                                .and().exceptionHandling().authenticationEntryPoint(jwtAuthenticationEntryPoint).and()
+                                .csrf().disable()
+                                .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                                .and()
+                                .authorizeRequests(configurer -> configurer
+                                                .antMatchers(
+                                                                "/error",
+                                                                "/login")
+                                                .permitAll()
+                                                .anyRequest()
+                                                .authenticated());
 
-    @Bean
-    @Override
-    protected UserDetailsService userDetailsService() {
-        InMemoryUserDetailsManager manager = new InMemoryUserDetailsManager();
+                http.addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class);
+                http.headers().cacheControl();
+        }
 
-        UserDetails producer = User
-                .withUsername("nickft")
-                .authorities("PRODUCER", "CONSUMER")
-                .passwordEncoder(passwordEncoder::encode)
-                .password("nickft123!")
-                .build();
+        @Bean
+        @Override
+        protected UserDetailsService userDetailsService() {
+                InMemoryUserDetailsManager manager = new InMemoryUserDetailsManager();
 
-        manager.createUser(producer);
+                UserDetails producer = User
+                                .withUsername("nickft")
+                                .authorities("PRODUCER", "CONSUMER")
+                                .passwordEncoder(passwordEncoder::encode)
+                                .password("nickft123!")
+                                .build();
 
-        UserDetails consumer = User
-                .withUsername("user")
-                .authorities("CONSUMER")
-                .passwordEncoder(passwordEncoder::encode)
-                .password("user123!")
-                .build();
-        manager.createUser(consumer);
+                manager.createUser(producer);
 
-        // TODO generate user certificate and private key
+                UserDetails consumer = User
+                                .withUsername("user")
+                                .authorities("CONSUMER")
+                                .passwordEncoder(passwordEncoder::encode)
+                                .password("user123!")
+                                .build();
+                manager.createUser(consumer);
 
-        return manager;
-    }
+                userInitializer.initializeUserContext(producer.getUsername());
+                userInitializer.initializeUserContext(consumer.getUsername());
+                return manager;
+        }
 
 }
