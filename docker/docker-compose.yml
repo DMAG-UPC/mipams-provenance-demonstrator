@@ -10,6 +10,7 @@ services:
       org_mipams_core_image_folder: "/app/assets"
       org_mipams_fake_media_demo_encSecret: "17bccfb498595c425c2833135315611f1abf1f58f507666f66761d43236bb384"
       org_mipams_fake_media_demo_encScheme: "AES-256"
+      org_mipams_fake_media_demo_credentials_path: "/app/credentials"
   # provenance-client:
   #   image: provenance-client:latest
   #   build:
