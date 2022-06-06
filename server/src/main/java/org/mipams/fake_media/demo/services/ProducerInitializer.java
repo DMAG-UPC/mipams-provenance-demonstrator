@@ -9,9 +9,9 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 @Service
-public class UserInitializer {
+public class ProducerInitializer {
 
-    private static final Logger logger = LoggerFactory.getLogger(UserInitializer.class);
+    private static final Logger logger = LoggerFactory.getLogger(ProducerInitializer.class);
 
     @Value("${org.mipams.fake_media.demo.credentials_path}")
     String CREDENTIALS_PATH;

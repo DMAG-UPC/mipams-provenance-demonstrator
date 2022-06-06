@@ -1,6 +1,6 @@
 package org.mipams.fake_media.demo.config;
 
-import org.mipams.fake_media.demo.services.UserInitializer;
+import org.mipams.fake_media.demo.services.ProducerInitializer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
@@ -32,7 +32,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
         JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
 
         @Autowired
-        UserInitializer userInitializer;
+        ProducerInitializer producerInitializer;
 
         @Override
         protected void configure(HttpSecurity http) throws Exception {
@@ -58,14 +58,15 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
         protected UserDetailsService userDetailsService() {
                 InMemoryUserDetailsManager manager = new InMemoryUserDetailsManager();
 
-                UserDetails producer = User
+                UserDetails producer1 = User
                                 .withUsername("nickft")
                                 .authorities("PRODUCER", "CONSUMER")
                                 .passwordEncoder(passwordEncoder::encode)
                                 .password("nickft123!")
                                 .build();
 
-                manager.createUser(producer);
+                manager.createUser(producer1);
+                producerInitializer.initializeUserContext(producer1.getUsername());
 
                 UserDetails consumer = User
                                 .withUsername("user")
@@ -75,8 +76,6 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                                 .build();
                 manager.createUser(consumer);
 
-                userInitializer.initializeUserContext(producer.getUsername());
-                userInitializer.initializeUserContext(consumer.getUsername());
                 return manager;
         }
 
