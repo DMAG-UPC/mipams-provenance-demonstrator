@@ -16,12 +16,13 @@ public class CredentialsCommand {
 
     private @Getter String directory;
     private @Getter String username;
+    private @Getter String organization;
 
     public String createCredentials() {
 
         final String script = CoreUtils.getFullPath(directory, CREDENTIALS_SCRIPT);
 
-        String[] cmd = { "sh", script, directory, username };
+        String[] cmd = { "sh", script, directory, username, organization };
 
         try {
             Process p = Runtime.getRuntime().exec(cmd);

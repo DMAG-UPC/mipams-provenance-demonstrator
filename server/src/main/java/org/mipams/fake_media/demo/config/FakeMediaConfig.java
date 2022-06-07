@@ -1,12 +1,12 @@
 package org.mipams.fake_media.demo.config;
 
-import org.mipams.fake_media.entities.assertions.AssertionFactory;
+import org.mipams.fake_media.services.AssertionFactory;
 import org.mipams.fake_media.services.ManifestDiscovery;
-import org.mipams.fake_media.services.ProvenanceConsumer;
-import org.mipams.fake_media.services.ProvenanceProducer;
+import org.mipams.fake_media.services.RedactionService;
 import org.mipams.fake_media.services.consumer.AssertionStoreConsumer;
 import org.mipams.fake_media.services.consumer.ClaimConsumer;
 import org.mipams.fake_media.services.consumer.ClaimSignatureConsumer;
+import org.mipams.fake_media.services.consumer.ManifestStoreConsumer;
 import org.mipams.fake_media.services.content_types.AssertionStoreContentType;
 import org.mipams.fake_media.services.content_types.ClaimContentType;
 import org.mipams.fake_media.services.content_types.ClaimSignatureContentType;
@@ -18,6 +18,7 @@ import org.mipams.fake_media.services.producer.AssertionRefProducer;
 import org.mipams.fake_media.services.producer.AssertionStoreProducer;
 import org.mipams.fake_media.services.producer.ClaimProducer;
 import org.mipams.fake_media.services.producer.ClaimSignatureProducer;
+import org.mipams.fake_media.services.producer.ManifestStoreProducer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -105,12 +106,18 @@ public class FakeMediaConfig {
     }
 
     @Bean
-    public ProvenanceProducer provenanceProducer() {
-        return new ProvenanceProducer();
+    public ManifestStoreConsumer manifestStoreConsumer() {
+        return new ManifestStoreConsumer();
     }
 
     @Bean
-    public ProvenanceConsumer provenanceConsumer() {
-        return new ProvenanceConsumer();
+    public ManifestStoreProducer manifestStoreProducer() {
+        return new ManifestStoreProducer();
     }
+
+    @Bean
+    public RedactionService redactionService() {
+        return new RedactionService();
+    }
+
 }

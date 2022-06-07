@@ -44,7 +44,9 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                                 .authorizeRequests(configurer -> configurer
                                                 .antMatchers(
                                                                 "/error",
-                                                                "/login")
+                                                                "/login",
+                                                                "/publicInspection",
+                                                                "/metadata/**")
                                                 .permitAll()
                                                 .anyRequest()
                                                 .authenticated());
@@ -66,7 +68,17 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                                 .build();
 
                 manager.createUser(producer1);
-                producerInitializer.initializeUserContext(producer1.getUsername());
+                producerInitializer.initializeUserContext(producer1.getUsername(), "CNN");
+
+                UserDetails producer2 = User
+                                .withUsername("reporter")
+                                .authorities("PRODUCER", "CONSUMER")
+                                .passwordEncoder(passwordEncoder::encode)
+                                .password("reporter123!")
+                                .build();
+
+                manager.createUser(producer2);
+                producerInitializer.initializeUserContext(producer2.getUsername(), "BBC");
 
                 UserDetails consumer = User
                                 .withUsername("user")

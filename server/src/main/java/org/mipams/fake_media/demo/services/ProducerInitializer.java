@@ -16,9 +16,9 @@ public class ProducerInitializer {
     @Value("${org.mipams.fake_media.demo.credentials_path}")
     String CREDENTIALS_PATH;
 
-    public String initializeUserContext(String username) {
+    public String initializeUserContext(String username, String organization) {
 
-        CredentialsCommand command = new CredentialsCommand(CREDENTIALS_PATH, username);
+        CredentialsCommand command = new CredentialsCommand(CREDENTIALS_PATH, username, organization);
 
         String result = command.createCredentials();
         logger.info(result);
