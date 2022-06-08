@@ -9,9 +9,12 @@ logging:
     org:
       mipams:
         jumbf:
-          core: INFO
+          core: DEBUG
           privsec: INFO
-        fake_media: INFO
+        fake_media:
+          - DEBUG
+          - demo: DEBUG
+
 org:
   mipams:
     core:
@@ -22,4 +25,6 @@ org:
         encSecret: "17bccfb498595c425c2833135315611f1abf1f58f507666f66761d43236bb384"
         encScheme: "AES-256"
         credentials_path: /home/nikos/Desktop/demo
+        provenance_path: /home/nikos/demo/generated
+        exiftool_path: /home/nikos/Desktop/demo
         claim_generator: "Mipams Generator v1.0"

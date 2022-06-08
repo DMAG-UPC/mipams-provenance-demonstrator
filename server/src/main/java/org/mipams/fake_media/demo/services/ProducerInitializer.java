@@ -16,7 +16,16 @@ public class ProducerInitializer {
     @Value("${org.mipams.fake_media.demo.credentials_path}")
     String CREDENTIALS_PATH;
 
+    @Value("${org.mipams.fake_media.demo.provenance_path}")
+    String PROVENANCE_PATH;
+
     public String initializeUserContext(String username, String organization) {
+
+        try {
+            CoreUtils.createSubdirectory(PROVENANCE_PATH, username);
+        } catch (MipamsException e) {
+            logger.error("Failed to create subdirectory for user " + username);
+        }
 
         CredentialsCommand command = new CredentialsCommand(CREDENTIALS_PATH, username, organization);
 
@@ -25,8 +34,12 @@ public class ProducerInitializer {
         return result;
     }
 
-    public String getUserDirectory(String username) throws MipamsException {
+    public String getCredentialsUserDirectory(String username) throws MipamsException {
         return CoreUtils.getFullPath(CREDENTIALS_PATH, username);
+    }
+
+    public String getUserAssetDirectory(String username) throws MipamsException {
+        return CoreUtils.getFullPath(PROVENANCE_PATH, username);
     }
 
 }

@@ -8,8 +8,10 @@ RUN groupadd mipams && useradd -g mipams -s /bin/bash mipams
 WORKDIR /app
 RUN mkdir /app/assets
 RUN mkdir /app/credentials
+RUN mkdir /app/generated
 RUN chown -R mipams:mipams /app/assets
 RUN chown -R mipams:mipams /app/credentials
+RUN chown -R mipams:mipams /app/generated
 
 RUN apt-get update && \
     apt-get -y install openssl wget && \

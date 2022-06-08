@@ -40,10 +40,8 @@ public class FileHandler {
         }
     }
 
-    public ResponseEntity<?> createOctetResponse(String fileName) throws MipamsException {
+    public ResponseEntity<?> createOctetResponse(String fileUrl) throws MipamsException {
         UrlResource urlResource;
-
-        String fileUrl = CoreUtils.getFullPath(properties.getFileDirectory(), fileName);
 
         try {
             urlResource = new UrlResource("file:" + fileUrl);
