@@ -35,7 +35,7 @@ export function AuthProvider({ children }) {
     const login = async (userDetails) => {
         try {
             await loginAction(userDetails.username, userDetails.password);
-            navigate("/");
+            navigate("/producer");
         } catch (error) {
             navigate("/login");
             console.log(error)

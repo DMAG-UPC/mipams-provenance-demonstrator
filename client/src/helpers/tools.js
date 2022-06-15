@@ -7,3 +7,26 @@ export function parseJwt(token) {
 
     return JSON.parse(jsonPayload);
 };
+
+export function getHistoryList() {
+
+    const nodeItems = document.getElementsByClassName("history-item");
+
+    let historyList = new Array();
+
+    for (let i = 0; i < nodeItems.length; i++) {
+        const innerNode = nodeItems[i].getElementsByTagName("span");
+        let text = innerNode[0].textContent;
+        text = text.replace(/[\n\r\s]/g, '');
+        console.log(text);
+
+        historyList.push(text);
+    }
+
+    return historyList;
+}
+
+export function getActionAssertions(editorHistoryList) {
+
+    return editorHistoryList;
+}

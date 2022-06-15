@@ -1,6 +1,7 @@
 package org.mipams.fake_media.demo.controller;
 
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.List;
 
 import org.mipams.fake_media.demo.entities.requests.UploadRequest;
@@ -19,9 +20,12 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
+
+import com.fasterxml.jackson.databind.JsonNode;
 
 @RestController
 @RequestMapping("/metadata")
@@ -44,6 +48,29 @@ public class MetadataController {
 
         try {
             String digitalAssetFileUrl = fileHandler.saveFileToDiskAndGetFileUrl(request, true);
+            logger.debug(digitalAssetFileUrl);
+
+            String digitalAssetFileId = digitalAssetFileUrl.substring(digitalAssetFileUrl.lastIndexOf("/") + 1);
+            return ResponseEntity.ok(FakeMediaUtils.generateJsonResponseFromString(digitalAssetFileId));
+        } catch (MipamsException e) {
+            return ResponseEntity.badRequest().body(FakeMediaUtils.generateJsonResponseFromString(e.getMessage()));
+        }
+    }
+
+    @RequestMapping(path = "/uploadContent", method = RequestMethod.POST, consumes = {
+            MediaType.APPLICATION_JSON_VALUE }, produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<?> uploadContent(@RequestBody JsonNode base64Node) throws MipamsException {
+        try {
+
+            if (base64Node == null || !base64Node.has("base64Content")) {
+                throw new MipamsException("Base64 Content must be provided");
+            }
+
+            String base64Content = base64Node.get("base64Content").asText();
+
+            byte[] imageContent = Base64.getDecoder().decode(base64Content);
+
+            String digitalAssetFileUrl = fileHandler.saveContentToDiskAndGetFileUrl(imageContent);
             logger.debug(digitalAssetFileUrl);
 
             String digitalAssetFileId = digitalAssetFileUrl.substring(digitalAssetFileUrl.lastIndexOf("/") + 1);

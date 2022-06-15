@@ -1,6 +1,7 @@
 package org.mipams.fake_media.demo.services;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 
 import org.mipams.fake_media.demo.entities.requests.UploadRequest;
@@ -16,6 +17,7 @@ import org.springframework.core.io.UrlResource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.method.P;
 
 @Service
 public class FileHandler {
@@ -38,6 +40,19 @@ public class FileHandler {
         } catch (IllegalStateException | IOException e) {
             throw new MipamsException("Could not upload file", e);
         }
+    }
+
+    public String saveContentToDiskAndGetFileUrl(byte[] content) throws MipamsException {
+
+        String targetFilePath = CoreUtils.getFullPath(properties.getFileDirectory(), CoreUtils.randomStringGenerator());
+
+        try (FileOutputStream outputStream = new FileOutputStream(targetFilePath)) {
+            outputStream.write(content);
+        } catch (IOException e) {
+            throw new MipamsException(e);
+        }
+
+        return targetFilePath;
     }
 
     public ResponseEntity<?> createOctetResponse(String fileUrl) throws MipamsException {
