@@ -53,6 +53,20 @@ public class MetadataController {
         }
     }
 
+    @RequestMapping(path = "/asset/{digitalAssetFileId}", method = RequestMethod.GET, produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
+    public ResponseEntity<?> getAsset(@PathVariable(value = "digitalAssetFileId") final String digitalAssetFileId)
+            throws MipamsException {
+
+        try {
+            String digitalAssetUrl = fileHandler.checkFileNameExistanceAndGetFileUrl(digitalAssetFileId);
+
+            logger.debug(digitalAssetUrl);
+            return fileHandler.createOctetResponse(digitalAssetUrl);
+        } catch (MipamsException e) {
+            return ResponseEntity.badRequest().body(FakeMediaUtils.generateJsonResponseFromString(e.getMessage()));
+        }
+    }
+
     @RequestMapping(path = "/getExifMetadata/{digitalAssetFileId}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> getExifMetadata(
             @PathVariable(value = "digitalAssetFileId") final String digitalAssetFileId) throws MipamsException {

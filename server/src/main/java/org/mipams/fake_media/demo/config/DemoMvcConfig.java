@@ -11,6 +11,6 @@ public class DemoMvcConfig implements WebMvcConfigurer {
 
     @Override
     public void addCorsMappings(CorsRegistry registry) {
-        registry.addMapping("/**").allowedOrigins("*").allowedMethods("GET", "POST", "OPTIONS", "PUT", "DELETE");
+        registry.addMapping("/**").allowedOrigins("http://localhost:3001").allowedMethods("*");
     }
 }

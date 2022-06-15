@@ -44,7 +44,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                                 .authorizeRequests(configurer -> configurer
                                                 .antMatchers("/error",
                                                                 "/login",
-                                                                "/metadata/**/*")
+                                                                "/metadata/**/*", "/asset/**")
                                                 .permitAll()
                                                 .anyRequest()
                                                 .authenticated());
