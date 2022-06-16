@@ -103,14 +103,6 @@ public class FakeMediaProducerService {
         List<JumbfBox> boxList = jpegCodestreamParser.parseMetadataFromFile(fakeMediaRequest.getAssetUrl());
         JumbfBox manifestStoreJumbfBox = fakeMediaConsumerService.locateManifestStoreJumbfBox(boxList);
 
-        String strippedDigitalAssetUrl;
-        if (manifestStoreJumbfBox != null) {
-            strippedDigitalAssetUrl = fakeMediaConsumerService
-                    .stripDigitalAssetFromProvenanceMetadata(fakeMediaRequest.getAssetUrl());
-        } else {
-            strippedDigitalAssetUrl = fakeMediaRequest.getAssetUrl();
-        }
-
         ProvenanceMetadata metadata = new ProvenanceMetadata();
         String tempWorkingDir = CoreUtils.createSubdirectory(properties.getFileDirectory(),
                 CoreUtils.randomStringGenerator());
@@ -120,7 +112,7 @@ public class FakeMediaProducerService {
                 fakeMediaRequest, metadata);
 
         ProvenanceSigner signer = getProvenanceSigner(userDetails);
-        ProducerRequestBuilder requestBuilder = new ProducerRequestBuilder(strippedDigitalAssetUrl);
+        ProducerRequestBuilder requestBuilder = new ProducerRequestBuilder(fakeMediaRequest.getModifiedAssetUrl());
         requestBuilder.setSigner(signer);
 
         ClaimGenerator claimGenerator = new ClaimGenerator();
@@ -132,17 +124,18 @@ public class FakeMediaProducerService {
 
         JumbfBox newManifestStoreJumbfBox = manifestStoreProducer.createManifestStore(requestBuilder.getResult());
 
-        for (BmffBox contentBox : newManifestStoreJumbfBox.getContentBoxList()) {
-            redactionService.redactAssertionsFromJumbfBox((JumbfBox) contentBox,
-                    fakeMediaRequest.getRedactedAssertionUriList());
+        if (fakeMediaRequest.getRedactedAssertionUriList() != null
+                && !fakeMediaRequest.getRedactedAssertionUriList().isEmpty()) {
+            for (BmffBox contentBox : newManifestStoreJumbfBox.getContentBoxList()) {
+                redactionService.redactAssertionsFromJumbfBox((JumbfBox) contentBox,
+                        fakeMediaRequest.getRedactedAssertionUriList());
+            }
         }
 
         String outputAssetUrl = jpegCodestreamGenerator.generateJumbfMetadataToFile(List.of(newManifestStoreJumbfBox),
-                strippedDigitalAssetUrl);
+                fakeMediaRequest.getModifiedAssetUrl());
 
         CoreUtils.deleteDir(metadata.getParentDirectory());
-
-        // TODO copy file to completed dir as well
 
         return outputAssetUrl;
     }

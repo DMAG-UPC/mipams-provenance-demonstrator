@@ -1,8 +1,11 @@
 import React from "react";
-import { Step, Stepper, StepLabel, Button, Box, Container, Snackbar, Alert } from '@mui/material'
+import { Step, Stepper, StepLabel, Button, Box, Container, Snackbar, Alert, Typography } from '@mui/material'
 import { styled } from '@mui/material/styles';
 import NavBar from '../NavBar';
 import AssetEditor from "./AssetEditor";
+import MetadataViewer from "../../containers/MetadataViewer";
+import UploadAsset from "./UploadAsset";
+import Recap from "./Recap";
 
 const StyledBox = styled(Box)(({ theme }) => ({
     padding: theme.spacing(1),
@@ -10,41 +13,46 @@ const StyledBox = styled(Box)(({ theme }) => ({
 }));
 
 
-const steps = ['Upload an asset', 'Additional metadata', 'Provenance History'];
+const steps = ['Upload an asset', 'Modify asset', 'Additional metadata', 'Provenance History'];
 
 function ProducerLayout(props) {
 
-    const {
-        activeStep,
-        editorRef,
-        loading,
-        assetName,
-        assertions,
-        setAssertions,
-        errorMessage,
-        onAlertClose,
-        uploadImageHandler,
-        onBackClick,
-        onResetClick,
-        onNextClick } = props;
+    const { activeStep, editorRef, loading, errorMessage, setErrorMessage, onNextClick, onAlertClose, onResetClick } = props;
+
+    const { onFileUploadChange } = props;
+
+    const { assetName, modifiedAssetName, assertions, protectedAssertionList } = props;
+
+    const { metadata, setMetadata, metadataStatus, setMetadataStatus } = props;
 
     let stepElement = null;
-
     if (activeStep === 0) {
-        // Apply Modifications
-        stepElement = <AssetEditor
-            activeStep={activeStep}
-            editorRef={editorRef}
-            setAssertions={setAssertions}
-        />;
+        stepElement = <UploadAsset
+            fullPage
+            loading={loading}
+            onFileUploadChange={onFileUploadChange}
+            onFileUploadClick={() => { }}
+        />
     } else if (activeStep === 1) {
-        // Review and encrypt metadata; add access rules
+        stepElement = <AssetEditor editorRef={editorRef} />;
     } else if (activeStep === 2) {
-        // print whole history and check redactions
-        stepElement = null;
+        stepElement = <MetadataViewer
+            assetName={assetName}
+            setErrorMessage={setErrorMessage}
+            metadata={metadata}
+            setMetadata={setMetadata}
+            metadataStatus={metadataStatus}
+            setMetadataStatus={setMetadataStatus}
+        />
+    } else if (activeStep === 3) {
+        stepElement = <Recap
+            assetName={assetName}
+            modifiedAssetName={modifiedAssetName}
+            assertions={assertions}
+            protectedAssertionList={protectedAssertionList}
+            setOutputName={null}
+        />
     }
-
-    // Output name and generate element
 
     return (
         <React.Fragment>
@@ -74,26 +82,28 @@ function ProducerLayout(props) {
                         );
                     })}
                 </Stepper>
-                <Container sx={{
-                    height: '70vh'
-                }}>
-                    {stepElement}
-                    <Box sx={{ display: 'flex', flexDirection: 'row', pt: 2 }}>
-                        <Button
-                            color="inherit"
-                            disabled={activeStep === 0}
-                            onClick={onBackClick}
-                            sx={{ mr: 1 }}
-                        >
-                            Back
-                        </Button>
-                        <Box sx={{ flex: '1 1 auto' }} />
+                {activeStep === steps.length ? (
+                    <React.Fragment>
+                        <Typography sx={{ mt: 2, mb: 1 }}>
+                            All steps completed - you&apos;re finished
+                        </Typography>
+                        <Box sx={{ display: 'flex', flexDirection: 'row', pt: 2 }}>
+                            <Box sx={{ flex: '1 1 auto' }} />
+                            <Button onClick={onResetClick}>Reset</Button>
+                        </Box>
+                    </React.Fragment>) :
+                    <Container sx={{
+                        height: '70vh'
+                    }}>
+                        {stepElement}
+                        <Box sx={{ display: 'flex', flexDirection: 'row', pt: 2 }}>
+                            <Box sx={{ flex: '1 1 auto' }} />
 
-                        <Button onClick={onNextClick} disabled={loading}>
-                            {activeStep === steps.length - 1 ? 'Generate Provenance' : 'Next'}
-                        </Button>
-                    </Box>
-                </Container>
+                            <Button onClick={onNextClick} disabled={loading}>
+                                {activeStep === steps.length - 1 ? 'Generate Provenance' : 'Next'}
+                            </Button>
+                        </Box>
+                    </Container>}
                 <Snackbar open={!!errorMessage} autoHideDuration={6000} onClose={onAlertClose}>
                     <Alert severity="error" onClose={onAlertClose} sx={{ flex: '1' }}>
                         Error parsing the file: {errorMessage}

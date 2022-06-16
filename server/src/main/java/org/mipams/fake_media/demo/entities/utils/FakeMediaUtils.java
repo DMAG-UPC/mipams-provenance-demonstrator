@@ -57,7 +57,13 @@ public class FakeMediaUtils {
             throw new MipamsException("assetUrl param cannot be empty");
         }
 
+        if (requestNode.get("modifiedAssetUrl") == null) {
+            throw new MipamsException("modifiedAssetUrl param cannot be empty");
+        }
+
         request.setAssetUrl(requestNode.get("assetUrl").asText());
+
+        request.setModifiedAssetUrl(requestNode.get("modifiedAssetUrl").asText());
 
         JsonNode assertionListNode = requestNode.get("assertionList");
         populateAssertionList(request, assertionListNode);
@@ -65,7 +71,7 @@ public class FakeMediaUtils {
         JsonNode encryptionAssertionListNode = requestNode.get("encryptionAssertionList");
         request.setEncryptionAssertionList(getRedactableAssertionList(encryptionAssertionListNode));
 
-        JsonNode encryptionWithAccessRulesAssertionListNode = requestNode.get("encryptionAssertionList");
+        JsonNode encryptionWithAccessRulesAssertionListNode = requestNode.get("encryptionWithAccessRulesAssertionList");
         request.setEncryptionWithAccessRulesAssertionList(
                 getRedactableAssertionList(encryptionWithAccessRulesAssertionListNode));
 
@@ -158,7 +164,12 @@ public class FakeMediaUtils {
                 throw new MipamsException("Could not deserialize input: " + assertionNode.toString());
             }
 
+            // if (ExifMetadataAssertion.class.equals(assertionClass)) {
+            // response = new
+            // ExifMetadataAssertion(assertionNode.get("exifMetadata").asText());
+            // } else {
             response = mapper.readValue(assertionNode.toString(), assertionClass);
+            // }
         } catch (JsonProcessingException e) {
             throw new MipamsException(e.getMessage());
         }

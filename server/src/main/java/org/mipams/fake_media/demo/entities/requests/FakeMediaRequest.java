@@ -10,6 +10,7 @@ import lombok.Setter;
 
 public class FakeMediaRequest {
     private @Getter @Setter String assetUrl;
+    private @Getter @Setter String modifiedAssetUrl;
     private @Getter @Setter List<Assertion> assertionList;
     private @Getter @Setter List<RedactableAssertion> encryptionAssertionList;
     private @Getter @Setter List<RedactableAssertion> encryptionWithAccessRulesAssertionList;

@@ -6,6 +6,7 @@ export const RequireAuth = ({ children }) => {
     const auth = useAuth();
 
     function isAuthorized() {
+
         if (!auth) {
             return false;
         }

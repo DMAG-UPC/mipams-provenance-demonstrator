@@ -27,6 +27,7 @@ export function AuthProvider({ children }) {
 
         const userObject = { username: jsonClaims.sub, roles: roleArray, tokenId: res.data.token, expirationDate: expirationDate };
         setUser(userObject);
+        localStorage.setItem("tokenId", userObject.tokenId);
     }
 
     const [user, setUser] = useState({});
@@ -44,6 +45,7 @@ export function AuthProvider({ children }) {
 
     const logout = () => {
         setUser();
+        localStorage.setItem("tokenId", "");
         navigate("/");
     };
 
