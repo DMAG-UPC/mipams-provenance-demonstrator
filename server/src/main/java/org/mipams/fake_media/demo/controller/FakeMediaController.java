@@ -107,13 +107,21 @@ public class FakeMediaController {
 
             String outputDigitalAssetUrl = fakeMediaProducerService.produce(userDetails, request);
 
-            String outputDir = producerInitializer.getUserAssetDirectory(userDetails.getUsername());
-            String requestedOutputUrl = CoreUtils.getFullPath(outputDir, request.getOutputAssetName());
-
-            outputDigitalAssetUrl = FakeMediaUtils.movefileToDirectory(outputDigitalAssetUrl, requestedOutputUrl);
-
+            // Rename asset
             String outputDigitalAssetId = outputDigitalAssetUrl.substring(outputDigitalAssetUrl.lastIndexOf("/") + 1);
-            logger.debug(outputDigitalAssetId);
+            logger.info("Initial: " + outputDigitalAssetId);
+
+            String requestDigitalAssetUrl = outputDigitalAssetUrl.replace(outputDigitalAssetId,
+                    request.getOutputAssetName());
+
+            logger.info("Copy from: " + outputDigitalAssetId + " to " + requestDigitalAssetUrl);
+            requestDigitalAssetUrl = FakeMediaUtils.movefileToDirectory(outputDigitalAssetUrl, requestDigitalAssetUrl);
+            logger.info("Result URL: " + requestDigitalAssetUrl);
+
+            // Copy asset to producer's dir
+            String userDir = producerInitializer.getUserAssetDirectory(userDetails.getUsername());
+            String assetTargetUrl = CoreUtils.getFullPath(userDir, request.getOutputAssetName());
+            assetTargetUrl = FakeMediaUtils.copyfileToDirectory(requestDigitalAssetUrl, assetTargetUrl);
 
             return ResponseEntity.ok().body(FakeMediaUtils.generateJsonResponseFromString(outputDigitalAssetId));
         } catch (MipamsException e) {
@@ -138,25 +146,6 @@ public class FakeMediaController {
         }
 
         return FakeMediaUtils.prepareResponse(responseList);
-    }
-
-    @GetMapping(path = "/download/{digitalAssetFileId}")
-    @PreAuthorize("hasAuthority('PRODUCER')")
-    public ResponseEntity<?> downloadFile(Authentication authentication,
-            @PathVariable(value = "digitalAssetFileId") final String digitalAssetFileId) {
-
-        UserDetails userDetails = userDetailsService.loadUserByUsername(authentication.getName());
-
-        try {
-
-            String producerDir = producerInitializer.getUserAssetDirectory(userDetails.getUsername());
-
-            String fileUrl = CoreUtils.getFullPath(producerDir, digitalAssetFileId);
-
-            return fileHandler.createOctetResponse(fileUrl);
-        } catch (MipamsException e) {
-            return ResponseEntity.badRequest().body(FakeMediaUtils.generateJsonResponseFromString(e.getMessage()));
-        }
     }
 
     @GetMapping(path = "/listfiles")

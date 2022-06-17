@@ -16,7 +16,7 @@ export default function ConsumerLayout(props) {
     const { assetName,
         provenanceInfo,
         fullInspectionAllowed,
-        fullInspectionHandler,
+        onFullInspectionClick,
         errorMessage,
         onAlertClose,
         loading,
@@ -37,7 +37,7 @@ export default function ConsumerLayout(props) {
             provenanceInfo={provenanceInfo}
             loading={loading}
             fullInspectionAllowed={fullInspectionAllowed}
-            fullInspectionHandler={fullInspectionHandler}
+            onFullInspectionClick={onFullInspectionClick}
         />
     </Paper>
 

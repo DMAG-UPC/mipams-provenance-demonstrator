@@ -5,7 +5,7 @@ import ProvenanceAnalysis from './ProvenanceAnalysis';
 
 const Inspection = (props) => {
 
-    const { assetName, provenanceInfo, loading, fullInspectionAllowed, fullInspectionHandler } = props;
+    const { assetName, provenanceInfo, loading, fullInspectionAllowed, onFullInspectionClick } = props;
 
     const imageUrl = (assetName) && "http://localhost:8080/metadata/asset/" + assetName;
 
@@ -22,7 +22,7 @@ const Inspection = (props) => {
             info={provenanceInfo}
             loading={loading}
             fullInspectionAllowed={fullInspectionAllowed}
-            fullInspectionHandler={fullInspectionHandler}
+            onFullInspectionClick={onFullInspectionClick}
         />
 
     return (

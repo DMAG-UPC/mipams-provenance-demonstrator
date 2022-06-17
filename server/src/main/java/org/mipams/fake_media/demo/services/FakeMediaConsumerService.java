@@ -73,6 +73,10 @@ public class FakeMediaConsumerService {
             return response;
         }
 
+        logger.info("---------------Manifest Store-------------------");
+        logger.info(manifestStoreJumbfBox.toString());
+        logger.info("-----------------------------------------------");
+
         String strippedDigitalAssetUrl = stripDigitalAssetFromProvenanceMetadata(digitalAssetUrl);
 
         if (fullInspection) {

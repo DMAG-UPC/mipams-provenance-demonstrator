@@ -4,6 +4,9 @@ export const typeToAssertionDict = {
     'Resize': 'mpms.prov.resized',
 }
 
+export function getRandomInt(max) {
+    return Math.floor(Math.random() * Math.floor(max));
+}
 
 export function parseJwt(token) {
     var base64Url = token.split('.')[1];
@@ -40,8 +43,6 @@ export function getActionAssertions(editorHistoryList) {
 
     var tempDict = {}
 
-    console.log(editorHistoryList);
-
     for (var element in editorHistoryList) {
         var parts = editorHistoryList[element].split("(")
 
@@ -56,7 +57,6 @@ export function getActionAssertions(editorHistoryList) {
             tempDict[parts[0]] = tempDict[parts[0]] + "," + parts[1].replace(")", "")
         }
     }
-    console.log(tempDict);
 
     var assertionList = [];
 
@@ -85,7 +85,7 @@ export function getMetadataList(data) {
 
     Object.keys(tempDict).forEach((key) => {
 
-        if (key === "SourceFile" || key === "ExifToolVersion") {
+        if (key === "SourceFile" || key === "ExifToolVersion" || key === "ExifMetadata") {
             return;
         }
 
@@ -108,4 +108,36 @@ export function getMetadataAssertions(metadataList) {
     metadataList.forEach(entry => (exifContent[entry.key] = entry.val));
 
     return [{ "exifMetadata": JSON.stringify(exifContent) }];
+}
+
+export function getAssertionDescription(assertion) {
+
+    var result = assertion.replace("mpms.prov.", '');
+
+    const firstLetter = result.slice(0, 1);
+
+    return firstLetter.toUpperCase() + result.substring(1);
+}
+
+export function getExifMetadataFromJSON(exifMetadata) {
+
+    var exifObject = JSON.parse(exifMetadata);
+
+    var result = "";
+
+    Object.keys(exifObject).forEach((key) => {
+        result = result + "[" + key + "]: " + exifObject[key]
+
+        if (result.length === 0) {
+            return;
+        }
+
+        result = result + ", ";
+    });
+
+    return result;
+}
+
+export function getManifestIdFromUri(uri) {
+    return uri.replace('self#jumbf=mipams/', '');
 }

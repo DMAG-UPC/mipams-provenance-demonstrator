@@ -1,6 +1,8 @@
 package org.mipams.fake_media.demo.entities.utils;
 
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -214,6 +216,31 @@ public class FakeMediaUtils {
             file.delete();
         } else {
             throw new MipamsException("Failed to move file: " + currentFileUrl);
+        }
+
+        return outputFileUrl;
+    }
+
+    public static String copyfileToDirectory(String currentFileUrl, String outputFileUrl) throws MipamsException {
+
+        String outputDir = outputFileUrl.substring(0, outputFileUrl.lastIndexOf("/"));
+        File outputFile = new File(outputFileUrl);
+
+        if (outputFile.exists()) {
+            outputFileUrl = CoreUtils.getFullPath(outputDir, CoreUtils.randomStringGenerator());
+            outputFile = new File(outputFileUrl);
+        }
+
+        File file = new File(currentFileUrl);
+
+        if (!file.exists()) {
+            throw new MipamsException("File " + currentFileUrl + " does not exist");
+        }
+
+        try {
+            Files.copy(file.toPath(), outputFile.toPath());
+        } catch (IOException e) {
+            throw new MipamsException(e);
         }
 
         return outputFileUrl;

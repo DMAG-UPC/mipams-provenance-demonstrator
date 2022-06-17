@@ -103,6 +103,12 @@ public class FakeMediaProducerService {
         List<JumbfBox> boxList = jpegCodestreamParser.parseMetadataFromFile(fakeMediaRequest.getAssetUrl());
         JumbfBox manifestStoreJumbfBox = fakeMediaConsumerService.locateManifestStoreJumbfBox(boxList);
 
+        if (manifestStoreJumbfBox != null) {
+            logger.info("---------------Manifest Store-------------------");
+            logger.info(manifestStoreJumbfBox.toString());
+            logger.info("-----------------------------------------------");
+        }
+
         ProvenanceMetadata metadata = new ProvenanceMetadata();
         String tempWorkingDir = CoreUtils.createSubdirectory(properties.getFileDirectory(),
                 CoreUtils.randomStringGenerator());
@@ -114,6 +120,7 @@ public class FakeMediaProducerService {
         ProvenanceSigner signer = getProvenanceSigner(userDetails);
         ProducerRequestBuilder requestBuilder = new ProducerRequestBuilder(fakeMediaRequest.getModifiedAssetUrl());
         requestBuilder.setSigner(signer);
+        requestBuilder.setManifestStore(manifestStoreJumbfBox);
 
         ClaimGenerator claimGenerator = new ClaimGenerator();
         claimGenerator.setDescription(CLAIM_GENERATOR_DESCRIPTION);

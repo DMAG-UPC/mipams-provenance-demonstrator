@@ -55,7 +55,7 @@ const ProvenanceStatus = (props) => {
 
     const { info } = props;
 
-    const statusElement = nonExistentStatus;
+    var statusElement = Boolean(info) && info.length > 0 ? successStatus : nonExistentStatus;
 
     return (
         <Status direction="row" spacing={2}>

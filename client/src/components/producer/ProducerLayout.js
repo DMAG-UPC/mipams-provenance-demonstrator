@@ -21,9 +21,11 @@ function ProducerLayout(props) {
 
     const { onFileUploadChange } = props;
 
-    const { assetName, modifiedAssetName, assertions, protectedAssertionList } = props;
+    const { assetName, modifiedAssetName, assertionList, protectedAssertionList } = props;
 
     const { metadata, setMetadata, metadataStatus, setMetadataStatus } = props;
+
+    const { outputAssetName, setOutputAssetName } = props;
 
     let stepElement = null;
     if (activeStep === 0) {
@@ -48,9 +50,10 @@ function ProducerLayout(props) {
         stepElement = <Recap
             assetName={assetName}
             modifiedAssetName={modifiedAssetName}
-            assertions={assertions}
+            assertionList={assertionList}
             protectedAssertionList={protectedAssertionList}
-            setOutputName={null}
+            outputAssetName={outputAssetName}
+            setOutputAssetName={setOutputAssetName}
         />
     }
 

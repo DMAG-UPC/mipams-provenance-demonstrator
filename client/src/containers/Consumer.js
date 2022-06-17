@@ -8,7 +8,7 @@ const Consumer = () => {
     const [errorMessage, setErrorMessage] = useState();
     const [uploadedFileName, setUploadedFileName] = useState();
     const [assetName, setAssetName] = useState();
-    const [provenanceInfo, setProvenanceInfo] = useState();
+    const [provenanceInfo, setProvenanceInfo] = useState([]);
 
     function fileUploadChangeHandler(event) {
         setUploadedFileName(event.target.files[0]);
@@ -19,9 +19,17 @@ const Consumer = () => {
         // Possibly we shall need it to reset something
     }
 
-    function fullInspectionClickHandler(event) {
+    function fullInspectionClickHandler() {
         setFullInspectionAllowed(false);
-        // TODO execute fullInspection and update provenanceInfo
+        setLoading(true);
+        api.get("/metadata/fullInspect/" + assetName).then(response => {
+            setLoading(false);
+            setProvenanceInfo(response.data.reverse());
+        }).catch(error => {
+            setProvenanceInfo();
+            setLoading(false);
+            setErrorMessage(error ? error.message : "An error has occured");
+        });
     }
 
     function alertCloseHandler() {
@@ -30,7 +38,10 @@ const Consumer = () => {
 
     useEffect(() => {
         if (uploadedFileName) {
+            setErrorMessage();
+            setFullInspectionAllowed(true);
             setLoading(true);
+            setProvenanceInfo([]);
 
             const formData = new FormData();
 

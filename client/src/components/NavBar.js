@@ -9,13 +9,18 @@ import MenuItem from '@mui/material/MenuItem';
 import Menu from '@mui/material/Menu';
 import { useAuth } from '../helpers/useAuth';
 import { useNavigate, useLocation } from "react-router-dom";
-import { Button } from '@mui/material';
+import { Button, Modal } from '@mui/material';
+import AssetView from '../containers/AssetView';
 
 export default function NavBar(props) {
     const auth = useAuth();
     const location = useLocation();
     const navigate = useNavigate();
     const [anchorEl, setAnchorEl] = React.useState(null);
+
+    const [openModal, setOpenModal] = React.useState(false);
+    const handleModalOpen = () => { handleClose(); setOpenModal(true) };
+    const handleModalClose = () => setOpenModal(false);
 
     const handleMenu = (event) => {
         setAnchorEl(event.currentTarget);
@@ -44,9 +49,10 @@ export default function NavBar(props) {
     }
 
     const menuElement = auth.user && auth.user.username ?
-        (<MenuItem onClick={handleLogout}>Logout</MenuItem>) :
-        (<MenuItem onClick={handleLogin}>Login</MenuItem>);
+        <MenuItem onClick={handleLogout}>Logout</MenuItem> :
+        <MenuItem onClick={handleLogin}>Login</MenuItem>;
 
+    const protectedMenuItemEl = (auth.user && auth.user.roles && auth.user.roles.includes("PRODUCER")) && <MenuItem onClick={handleModalOpen}>View Assets</MenuItem>
 
     let buttonElement = null;
     if (location.pathname === "/producer") {
@@ -104,11 +110,25 @@ export default function NavBar(props) {
                             open={Boolean(anchorEl)}
                             onClose={handleClose}
                         >
+                            {protectedMenuItemEl}
                             {menuElement}
                         </Menu>
                     </div>
                 </Toolbar>
+                <Modal
+                    open={openModal}
+                    onClose={handleModalClose}
+                    aria-labelledby="modal-modal-title"
+                    aria-describedby="modal-modal-description"
+                    sx={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center'
+                    }}
+                >
+                    <AssetView />
+                </Modal>
             </AppBar>
-        </Box>
+        </Box >
     );
 }
