@@ -1,8 +1,11 @@
 import React, { useEffect, useState } from 'react'
 import ConsumerLayout from '../components/consumer/ConsumerLayout';
 import api from '../helpers/api';
+import { useAuth } from '../helpers/useAuth';
 
 const Consumer = () => {
+    const auth = useAuth();
+
     const [loading, setLoading] = useState(false);
     const [fullInspectionAllowed, setFullInspectionAllowed] = useState(true);
     const [errorMessage, setErrorMessage] = useState();
@@ -22,7 +25,10 @@ const Consumer = () => {
     function fullInspectionClickHandler() {
         setFullInspectionAllowed(false);
         setLoading(true);
-        api.get("/metadata/fullInspect/" + assetName).then(response => {
+
+        const fullInspectUri = Boolean(auth.user.username) ? "/mipams-provenance/fullInspection/" : "/metadata/fullInspect/";
+
+        api.get(fullInspectUri + assetName).then(response => {
             setLoading(false);
             setProvenanceInfo(response.data.reverse());
         }).catch(error => {
@@ -53,14 +59,16 @@ const Consumer = () => {
 
             // Request made to the backend api Send formData object
 
+            const inspectUri = Boolean(auth.user.username) ? "/mipams-provenance/inspection/" : "/metadata/inspect/";
+
             api.post("/metadata/upload", formData).then(response => {
                 setAssetName(response.data);
                 setErrorMessage(null);
 
-                api.get("/metadata/inspect/" + response.data).then(response => {
+                api.get(inspectUri + response.data).then(response => {
                     setLoading(false);
-                    setProvenanceInfo(JSON.parse(response.data));
-                })
+                    setProvenanceInfo(response.data);
+                });
 
             }).catch(error => {
                 setProvenanceInfo();

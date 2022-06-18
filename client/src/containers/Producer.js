@@ -103,11 +103,7 @@ const Producer = () => {
                 if (metadataStatus === "protected") {
                     setProtectedAssertionList(metadataAssertionList);
                 } else {
-                    if (assertionList) {
-                        setAssertionList((oldList) => [...oldList, ...metadataAssertionList]);
-                    } else {
-                        setAssertionList(metadataAssertionList)
-                    }
+                    setAssertionList((oldList) => [...oldList, ...metadataAssertionList]);
                 }
             }
         }

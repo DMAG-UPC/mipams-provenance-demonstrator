@@ -111,12 +111,10 @@ public class EncryptAssertionService {
         encryptionRequest.setContentFileUrl(jumbfFilePath);
 
         try {
-            cryptoService.encryptDocument(getSecretKey(), encryptionRequest);
+            return cryptoService.encryptDocument(getSecretKey(), encryptionRequest);
         } catch (CryptoException e) {
             throw new MipamsException(ProvenanceErrorMessages.ENCRYPTION_ERROR, e);
         }
-
-        return null;
     }
 
     private JumbfBox buildProtectionBox(byte[] iv, String assertionLabel,
@@ -166,10 +164,8 @@ public class EncryptAssertionService {
         byte[] aesKeyData = DatatypeConverter.parseHexBinary(ENCRYPTION_SECRET);
 
         try {
-            SecretKeySpec secretKeySpec = new SecretKeySpec(aesKeyData, "AES");
-            SecretKeyFactory keyFactory = SecretKeyFactory.getInstance("AES");
-            return keyFactory.generateSecret(secretKeySpec);
-        } catch (NoSuchAlgorithmException | InvalidKeySpecException e) {
+            return new SecretKeySpec(aesKeyData, "AES");
+        } catch (IllegalArgumentException e) {
             throw new MipamsException(e);
         }
     }

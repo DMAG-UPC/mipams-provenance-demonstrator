@@ -141,3 +141,16 @@ export function getExifMetadataFromJSON(exifMetadata) {
 export function getManifestIdFromUri(uri) {
     return uri.replace('self#jumbf=mipams/', '');
 }
+
+export function displayManifestId(manifestId) {
+
+    var res = String(manifestId);
+
+    res = res.replace("urn:uuid:", '');
+
+    return "urn:uuid:" + res.toUpperCase();
+}
+
+export function isAssertionLabel(assertion) {
+    return (typeof assertion === 'string' && (assertion.startsWith("mpms.") || assertion.startsWith("stds.")));
+}

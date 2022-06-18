@@ -24,16 +24,16 @@ const successStatus =
         </Typography>
     </React.Fragment>;
 
-const failureStatus =
+const partialSuccessStatus =
     <React.Fragment>
-        <Tooltip title="Both Manifest and digital asset might be corrupted.">
+        <Tooltip title="Provenance is partially validated. There are protected assertions.">
             <ErrorRoundedIcon
                 sx={{
                     color: 'orange'
                 }} />
         </Tooltip>
         <Typography>
-            Corrupted Provenance
+            Partially Validated
         </Typography>
     </React.Fragment>;
 
@@ -55,7 +55,18 @@ const ProvenanceStatus = (props) => {
 
     const { info } = props;
 
-    var statusElement = Boolean(info) && info.length > 0 ? successStatus : nonExistentStatus;
+    var statusElement = null;
+
+    if (Boolean(info) && info.length > 0) {
+        console.log(info);
+        if (info[0].inaccessibleJumbfBoxLabelList && info[0].inaccessibleJumbfBoxLabelList.length > 0) {
+            statusElement = partialSuccessStatus;
+        } else {
+            statusElement = successStatus;
+        }
+    } else {
+        statusElement = nonExistentStatus;
+    }
 
     return (
         <Status direction="row" spacing={2}>

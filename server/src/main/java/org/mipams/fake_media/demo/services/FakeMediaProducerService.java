@@ -166,7 +166,7 @@ public class FakeMediaProducerService {
                 metadata);
 
         appendEncryptedAssertionJumbfBoxesWithAccessRules(assertionJumbfBoxList,
-                fakeMediaRequest.getEncryptionAssertionList(), metadata);
+                fakeMediaRequest.getEncryptionWithAccessRulesAssertionList(), metadata);
 
         return assertionJumbfBoxList;
     }

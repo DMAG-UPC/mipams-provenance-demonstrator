@@ -132,7 +132,7 @@ public class MetadataController {
                     fakeMediaConsumerService.inspect(digitalAssetFileUrl, false, null));
 
             logger.debug(result);
-            return ResponseEntity.ok().body(FakeMediaUtils.generateJsonResponseFromString(result));
+            return ResponseEntity.ok().body(result);
         } catch (MipamsException e) {
             return ResponseEntity.badRequest().body(FakeMediaUtils.generateJsonResponseFromString(e.getMessage()));
         }

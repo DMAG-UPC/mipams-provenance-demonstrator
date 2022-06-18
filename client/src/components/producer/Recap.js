@@ -12,6 +12,7 @@ const Recap = (props) => {
     const { assertionList, protectedAssertionList, outputAssetName, setOutputAssetName } = props;
 
     useEffect(() => {
+        console.log(1);
         if (assertionList) {
             setAssertionListEl(<Grid item xs={12} md={6}>
                 <Typography sx={{ mt: 4, mb: 2 }} variant="h6" component="div">
@@ -23,6 +24,7 @@ const Recap = (props) => {
     }, [assertionList]);
 
     useEffect(() => {
+        console.log(2);
         if (protectedAssertionList && protectedAssertionList.length > 0) {
             setProtectedAssertionListEl(<Grid item xs={12} md={6}>
                 <Typography sx={{ mt: 4, mb: 2 }} variant="h6" component="div">
@@ -31,7 +33,7 @@ const Recap = (props) => {
                 <AssertionView assertionList={protectedAssertionList} />
             </Grid>);
         }
-    }, [protectedAssertionListEl]);
+    }, [protectedAssertionList]);
 
     return (
         <Stack

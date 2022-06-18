@@ -8,6 +8,8 @@ import { Box } from '@mui/system';
 
 import AssertionView from '../AssertionView';
 
+import { displayManifestId } from '../../helpers/tools';
+
 const StyledBox = styled(Box)(({ theme }) => ({
     padding: theme.spacing(1),
 }));
@@ -45,7 +47,7 @@ const ManifestView = (props) => {
                 {isActive && <Tooltip title="Active Manifest">
                     <StarRateIcon sx={{ color: 'gold', marginRight: '5px' }} />
                 </Tooltip>}
-                <Typography>Manifest: {String(info.manifestId).toUpperCase()} </Typography>
+                <Typography>Manifest: {displayManifestId(info.manifestId)} </Typography>
             </AccordionSummary>
             <AccordionDetails>
                 <Stack spacing={2} direction="column" divider={<Divider />}>

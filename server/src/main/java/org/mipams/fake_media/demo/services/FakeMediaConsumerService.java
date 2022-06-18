@@ -144,10 +144,15 @@ public class FakeMediaConsumerService {
         for (JumbfBox assertionJumbfBox : new ArrayList<>(assertionJumbfBoxList)) {
             if (assertionFactory.isJumbfBoxAnAssertion(assertionJumbfBox) && isProtectionBox(assertionJumbfBox)) {
 
+                logger.info("Found a Protection Box");
+
                 ProtectionDescriptionBox dBox = (ProtectionDescriptionBox) assertionJumbfBox.getContentBoxList().get(0);
                 BinaryDataBox bDataBox = (BinaryDataBox) assertionJumbfBox.getContentBoxList().get(1);
 
                 if (dBox.accessRulesExist()) {
+
+                    logger.info("Found Access Rules as well");
+
                     JumbfBox arJumbfBox = CoreUtils.locateJumbfBoxFromLabel(assertionJumbfBoxList, dBox.getArLabel());
 
                     if (!encryptAssertionService.userHasAccessToResource(userDetails, arJumbfBox)) {
@@ -156,6 +161,8 @@ public class FakeMediaConsumerService {
 
                     assertionJumbfBoxList.remove(arJumbfBox);
                 }
+
+                logger.info("Access Granted. Decrypting assertion");
 
                 JumbfBox decryptedAssertionJumbfBox = encryptAssertionService.decrypt(dBox, bDataBox);
                 assertionJumbfBoxList.add(decryptedAssertionJumbfBox);

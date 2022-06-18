@@ -8,8 +8,9 @@ import ColorLensIcon from '@mui/icons-material/ColorLens';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import DescriptionOutlinedIcon from '@mui/icons-material/DescriptionOutlined';
 import TimelineOutlinedIcon from '@mui/icons-material/TimelineOutlined';
+import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
 
-import { getAssertionDescription, getExifMetadataFromJSON, getRandomInt, getManifestIdFromUri } from '../helpers/tools';
+import { getAssertionDescription, getExifMetadataFromJSON, getRandomInt, getManifestIdFromUri, isAssertionLabel } from '../helpers/tools';
 
 
 const AssertionView = (props) => {
@@ -41,6 +42,8 @@ function getAssertionListItem(assertion) {
         return <Typography> The checksum of the digital asset is copmuted using {assertion.algorithm} </Typography>
     } else if (Boolean(assertion.relationship) && assertion.relationship === "parentOf") {
         return getParentRelationshipListItem(assertion);
+    } else if (isAssertionLabel(assertion)) {
+        return getProtectedListItem(assertion);
     } else {
         console.log(assertion);
         return <ListItemText primary={assertion} />;
@@ -83,5 +86,15 @@ function getParentRelationshipListItem(assertion) {
     return <Stack direction="row" spacing={1}>
         <TimelineOutlinedIcon />
         <Typography> Parent Manifest is: {getManifestIdFromUri(assertion.manifestReference.uri)} </Typography>
+    </Stack>
+}
+
+function getProtectedListItem(assertion) {
+    return <Stack direction="row" spacing={1}>
+        <DescriptionOutlinedIcon />
+        <Typography> Exif Metadata </Typography>
+        <Tooltip title="You don't have access to view this piece of metadata">
+            <LockOutlinedIcon sx={{ color: 'blue' }} />
+        </Tooltip>
     </Stack>
 }
