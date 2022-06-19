@@ -7,5 +7,6 @@ import lombok.Setter;
 @NoArgsConstructor
 public class ClaimResponse {
     private @Getter @Setter String signedBy;
+    private @Getter @Setter String signedOn;
     private @Getter @Setter String signedGeneratorDescription;
 }

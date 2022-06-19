@@ -31,8 +31,11 @@ const ManifestView = (props) => {
     var assertionListElement = info.assertionList && <AssertionView assertionList={[...info.assertionList, ...info.inaccessibleJumbfBoxLabelList]} />;
 
     var claimElement = <StyledBox>
-        <Typography sx={{ fontWeight: "bold" }}>
-            Signed by {getOrganizationUnit(info.claimResponse.signedBy)}
+        <Typography >
+            <b>Signed by:</b> {getOrganizationUnit(info.claimResponse.signedBy)}
+        </Typography>
+        <Typography >
+            <b>Signed on:</b> {info.claimResponse.signedOn} UTC
         </Typography>
     </StyledBox>
 

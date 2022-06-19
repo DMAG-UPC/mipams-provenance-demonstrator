@@ -122,7 +122,8 @@ const Producer = () => {
                 "assetUrl": "/app/assets/" + assetName,
                 "modifiedAssetUrl": "/app/assets/" + modifiedAssetName,
                 "assertionList": assertionList,
-                "encryptionAssertionList": (protectedAssertionList) ? protectedAssertionList : [],
+                "encryptionAssertionList": [],
+                "encryptionWithAccessRulesAssertionList": (protectedAssertionList) ? protectedAssertionList : [],
                 "redactedAssertionUriList": [],
                 "componentIngredientUriList": [],
                 "outputAssetName": outputAssetName

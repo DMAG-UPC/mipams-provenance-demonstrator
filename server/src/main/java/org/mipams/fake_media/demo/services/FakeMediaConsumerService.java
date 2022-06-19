@@ -184,8 +184,7 @@ public class FakeMediaConsumerService {
         List<String> inaccessibleJumbfBoxLabelList = getProtectionBoxLabelList(
                 manifestResponse.getAssertionJumbfBoxList());
 
-        ClaimResponse claimResponse = generateClaimResponse(manifestResponse.getClaim(),
-                manifestResponse.getClaimCertificate());
+        ClaimResponse claimResponse = generateClaimResponse(manifestResponse);
         response.setClaimResponse(claimResponse);
         response.setInaccessibleJumbfBoxLabelList(inaccessibleJumbfBoxLabelList);
 
@@ -225,15 +224,15 @@ public class FakeMediaConsumerService {
         return result;
     }
 
-    private ClaimResponse generateClaimResponse(JumbfBox claimJumbfBox, byte[] claimCertificate)
+    private ClaimResponse generateClaimResponse(ManifestResponse manifestResponse)
             throws MipamsException {
 
         ClaimResponse claimResponse = new ClaimResponse();
 
-        Claim claim = claimConsumer.desirializeClaimJumbfBox(claimJumbfBox);
-        claimResponse.setSignedGeneratorDescription(claim.getClaimGeneratorDescription());
+        claimResponse.setSignedGeneratorDescription(manifestResponse.getClaim().getClaimGeneratorDescription());
+        claimResponse.setSignedOn(manifestResponse.getClaimSignature().getDate());
 
-        String dname = getDistinguishedNameFromCertificate(claimCertificate);
+        String dname = getDistinguishedNameFromCertificate(manifestResponse.getClaimSignature().getCertificate());
         claimResponse.setSignedBy(dname);
 
         return claimResponse;

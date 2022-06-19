@@ -3,12 +3,9 @@ package org.mipams.fake_media.demo.services;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.security.NoSuchAlgorithmException;
-import java.security.spec.InvalidKeySpecException;
 import java.util.Collection;
 
 import javax.crypto.SecretKey;
-import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.SecretKeySpec;
 import javax.xml.bind.DatatypeConverter;
 
@@ -130,6 +127,7 @@ public class EncryptAssertionService {
         pdBox.setAes256CbcWithIvProtection();
         pdBox.setIv(iv);
         pdBox.setArLabel(accessRulesLabel);
+        pdBox.includeAccessRulesInToggle();
 
         BinaryDataBox bdBox = new BinaryDataBox();
         bdBox.setFileUrl(encryptedContentFilePath);
