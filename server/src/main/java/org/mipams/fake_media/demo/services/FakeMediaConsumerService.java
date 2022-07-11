@@ -7,7 +7,6 @@ import java.util.List;
 
 import org.mipams.fake_media.demo.entities.responses.ClaimResponse;
 import org.mipams.fake_media.demo.entities.responses.FakeMediaResponse;
-import org.mipams.fake_media.entities.Claim;
 import org.mipams.fake_media.entities.assertions.Assertion;
 import org.mipams.fake_media.entities.responses.ManifestResponse;
 import org.mipams.fake_media.entities.responses.ManifestStoreResponse;
@@ -155,11 +154,15 @@ public class FakeMediaConsumerService {
 
                     JumbfBox arJumbfBox = CoreUtils.locateJumbfBoxFromLabel(assertionJumbfBoxList, dBox.getArLabel());
 
-                    if (!encryptAssertionService.userHasAccessToResource(userDetails, arJumbfBox)) {
+                    try {
+                        logger.info(encryptAssertionService.userHasAccessToResource(userDetails, arJumbfBox));
+                    } catch (CryptoException e) {
+                        logger.info(e.getMessage());
                         continue;
+                    } finally {
+                        logger.info("Removing assertion Jumbf Box");
+                        assertionJumbfBoxList.remove(arJumbfBox);
                     }
-
-                    assertionJumbfBoxList.remove(arJumbfBox);
                 }
 
                 logger.info("Access Granted. Decrypting assertion");

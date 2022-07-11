@@ -21,7 +21,7 @@ function ProducerLayout(props) {
 
     const { onFileUploadChange } = props;
 
-    const { assetName, modifiedAssetName, assertionList, protectedAssertionList } = props;
+    const { assetName, modifiedAssetName, assertionList, protectedAssertionList, protectedAssertionWithARList } = props;
 
     const { metadata, setMetadata, metadataStatus, setMetadataStatus } = props;
 
@@ -52,6 +52,7 @@ function ProducerLayout(props) {
             modifiedAssetName={modifiedAssetName}
             assertionList={assertionList}
             protectedAssertionList={protectedAssertionList}
+            protectedAssertionWithARList={protectedAssertionWithARList}
             outputAssetName={outputAssetName}
             setOutputAssetName={setOutputAssetName}
         />

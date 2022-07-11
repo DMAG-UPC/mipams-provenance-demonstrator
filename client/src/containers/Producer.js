@@ -16,6 +16,7 @@ const Producer = () => {
     const [metadata, setMetadata] = useState();
     const [metadataStatus, setMetadataStatus] = useState("unprotected");
     const [protectedAssertionList, setProtectedAssertionList] = useState([]);
+    const [protectedAssertionWithARList, setProtectedAssertionWithARList] = useState([]);
     const [assetName, setAssetName] = useState();
     const [modifiedAssetName, setModifiedAssetName] = useState();
     const [outputAssetName, setOutputAssetName] = useState("test.jpg");
@@ -100,8 +101,10 @@ const Producer = () => {
             if (metadata && metadata.length > 0) {
                 var metadataAssertionList = getMetadataAssertions(metadata);
 
-                if (metadataStatus === "protected") {
+                if (metadataStatus === "protected-level1") {
                     setProtectedAssertionList(metadataAssertionList);
+                } else if (metadataStatus === "protected-level2") {
+                    setProtectedAssertionWithARList(metadataAssertionList);
                 } else {
                     setAssertionList((oldList) => [...oldList, ...metadataAssertionList]);
                 }
@@ -122,8 +125,8 @@ const Producer = () => {
                 "assetUrl": "/app/assets/" + assetName,
                 "modifiedAssetUrl": "/app/assets/" + modifiedAssetName,
                 "assertionList": assertionList,
-                "encryptionAssertionList": [],
-                "encryptionWithAccessRulesAssertionList": (protectedAssertionList) ? protectedAssertionList : [],
+                "encryptionAssertionList": (protectedAssertionList) ? protectedAssertionList : [],
+                "encryptionWithAccessRulesAssertionList": (protectedAssertionWithARList) ? protectedAssertionWithARList : [],
                 "redactedAssertionUriList": [],
                 "componentIngredientUriList": [],
                 "outputAssetName": outputAssetName
@@ -154,6 +157,7 @@ const Producer = () => {
             editorInstance._clearHistory();
         }
 
+        setOutputAssetName("test.jpg");
         setActiveStep(0);
     };
 
@@ -173,7 +177,7 @@ const Producer = () => {
             onFileUploadChange={fileUploadChangeHandler}
             assertionList={assertionList}
             protectedAssertionList={protectedAssertionList}
-            setProtectedAssertionList={setProtectedAssertionList}
+            protectedAssertionWithARList={protectedAssertionWithARList}
             onAlertClose={alertCloseHandler}
             onNextClick={nextHandler}
             onResetClick={resetHandler}

@@ -17,9 +17,11 @@ import org.mipams.jumbf.core.entities.BinaryDataBox;
 import org.mipams.jumbf.core.entities.JsonBox;
 import org.mipams.jumbf.core.entities.JumbfBox;
 import org.mipams.jumbf.core.entities.JumbfBoxBuilder;
+import org.mipams.jumbf.core.entities.XmlBox;
 import org.mipams.jumbf.core.services.CoreParserService;
 import org.mipams.jumbf.core.services.boxes.JumbfBoxService;
 import org.mipams.jumbf.core.services.content_types.JsonContentType;
+import org.mipams.jumbf.core.services.content_types.XmlContentType;
 import org.mipams.jumbf.core.util.CoreUtils;
 import org.mipams.jumbf.core.util.MipamsException;
 import org.mipams.jumbf.crypto.entities.CryptoException;
@@ -117,17 +119,18 @@ public class EncryptAssertionService {
     private JumbfBox buildProtectionBox(byte[] iv, String assertionLabel,
             String accessRulesLabel, String encryptedContentFilePath) throws MipamsException {
 
-        JumbfBoxBuilder builder = new JumbfBoxBuilder();
-
+        JumbfBoxBuilder builder = new JumbfBoxBuilder(new ProtectionContentType());
         builder.setJumbfBoxAsRequestable();
         builder.setLabel(assertionLabel);
-        builder.setContentType(new ProtectionContentType());
 
         ProtectionDescriptionBox pdBox = new ProtectionDescriptionBox();
         pdBox.setAes256CbcWithIvProtection();
         pdBox.setIv(iv);
-        pdBox.setArLabel(accessRulesLabel);
-        pdBox.includeAccessRulesInToggle();
+
+        if (accessRulesLabel != null) {
+            pdBox.setArLabel(accessRulesLabel);
+            pdBox.includeAccessRulesInToggle();
+        }
 
         BinaryDataBox bdBox = new BinaryDataBox();
         bdBox.setFileUrl(encryptedContentFilePath);
@@ -168,18 +171,14 @@ public class EncryptAssertionService {
         }
     }
 
-    public boolean userHasAccessToResource(UserDetails userDetails, JumbfBox accessRulesJumbfBox)
-            throws MipamsException {
+    public String userHasAccessToResource(UserDetails userDetails, JumbfBox accessRulesJumbfBox)
+            throws CryptoException {
 
         String username = userDetails.getUsername();
         String rolesAsList = authoritiesToList(userDetails.getAuthorities());
         JumbfBox accessRules = accessRulesJumbfBox;
 
-        try {
-            return !cryptoService.accessRulesVerifiedSuccessfully(username, rolesAsList, accessRules);
-        } catch (CryptoException e) {
-            throw new MipamsException(e);
-        }
+        return cryptoService.authorizeAccessToResource(accessRules, username, rolesAsList);
     }
 
     private String authoritiesToList(Collection<? extends GrantedAuthority> authorities) {
@@ -198,30 +197,24 @@ public class EncryptAssertionService {
 
     public JumbfBox defineAccessRulesForAssertion(String accessRulesLabel, String rule, ProvenanceMetadata metadata)
             throws MipamsException {
-        JumbfBoxBuilder builder = new JumbfBoxBuilder();
+        JumbfBoxBuilder builder = new JumbfBoxBuilder(new XmlContentType());
 
         builder.setJumbfBoxAsRequestable();
         builder.setLabel(accessRulesLabel);
-        builder.setContentType(new JsonContentType());
 
-        JsonBox jsonBox = new JsonBox();
-
-        String jsonRuleUrl = CoreUtils.getFullPath(metadata.getParentDirectory(),
-                CoreUtils.randomStringGenerator() + ".json");
+        XmlBox xmlBox = new XmlBox();
 
         if (rule == null) {
-            rule = "{\"rule\": \"user must be connected\"}";
+            try {
+                rule = cryptoService.generatePolicy();
+            } catch (CryptoException e) {
+                throw new MipamsException(e);
+            }
         }
 
-        try (OutputStream os = new FileOutputStream(jsonRuleUrl)) {
-            os.write(rule.getBytes());
-        } catch (IOException e) {
-            throw new MipamsException(e);
-        }
+        xmlBox.setContent(rule.getBytes());
 
-        jsonBox.setFileUrl(jsonRuleUrl);
-
-        builder.appendContentBox(jsonBox);
+        builder.appendContentBox(xmlBox);
 
         return builder.getResult();
     }

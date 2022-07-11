@@ -77,7 +77,9 @@ export function getActionAssertions(editorHistoryList) {
 
 export function getMetadataList(data) {
 
-    var tempDict = data[0];
+    var ignoredAttributes = ["ExifMetadata", "DataDump", "ThumbnailImage", "ExifToolVersion", "SourceFile", "FileName", "Directory", "FileSize", "FileModifyDate", "FileAccessDate", "FileInodeChangeDate", "FilePermissions", "FileType"]
+
+    var tempDict = (Array.isArray(data)) ? data[0] : JSON.parse(data);
 
     var resultList = [];
 
@@ -85,8 +87,12 @@ export function getMetadataList(data) {
 
     Object.keys(tempDict).forEach((key) => {
 
-        if (key === "SourceFile" || key === "ExifToolVersion" || key === "ExifMetadata") {
+        if (ignoredAttributes.includes(key)) {
             return;
+        }
+
+        if (!tempDict[key] || tempDict[key] === 'n/a') {
+            return
         }
 
         var template = {

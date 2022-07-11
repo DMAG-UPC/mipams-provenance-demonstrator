@@ -58,7 +58,6 @@ const ProvenanceStatus = (props) => {
     var statusElement = null;
 
     if (Boolean(info) && info.length > 0) {
-        console.log(info);
         if (info[0].inaccessibleJumbfBoxLabelList && info[0].inaccessibleJumbfBoxLabelList.length > 0) {
             statusElement = partialSuccessStatus;
         } else {

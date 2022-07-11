@@ -16,7 +16,7 @@ echo "$organization"
 cd $directory
 mkdir $username
 
-`keytool -genkeypair -ext san=dns:localhost -storetype PKCS12 -keystore server.p12 -storepass password -alias myalias -keyalg RSA -keysize 4096 -dname "O=MIPAMS,OU=${organization},CN=${organization}"`
+`keytool -genkeypair -ext san=dns:localhost -storetype PKCS12 -keystore server.p12 -storepass password -alias myalias -keyalg RSA -keysize 4096 -dname "OU=${organization}"`
 
 `keytool -exportcert -rfc -keystore server.p12 -storepass password -alias myalias -file ${username}/${username}.crt`
 

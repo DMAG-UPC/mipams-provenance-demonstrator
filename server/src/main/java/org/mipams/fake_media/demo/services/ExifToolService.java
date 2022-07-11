@@ -13,6 +13,6 @@ public class ExifToolService {
 
     public String parseExifMetadata(String digitalAssetUrl) throws MipamsException {
         ExifToolCommand command = new ExifToolCommand(EXIF_TOOL_PATH);
-        return command.execute("-j", "-exif*", digitalAssetUrl);
+        return command.execute("-j", digitalAssetUrl);
     }
 }
