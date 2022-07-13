@@ -139,8 +139,10 @@ public class FakeMediaProducerService {
             }
         }
 
-        String outputAssetUrl = jpegCodestreamGenerator.generateJumbfMetadataToFile(List.of(newManifestStoreJumbfBox),
-                fakeMediaRequest.getModifiedAssetUrl());
+        String outputAssetUrl = fakeMediaRequest.getModifiedAssetUrl() + "-new";
+
+        jpegCodestreamGenerator.generateJumbfMetadataToFile(List.of(newManifestStoreJumbfBox),
+                fakeMediaRequest.getModifiedAssetUrl(), outputAssetUrl);
 
         CoreUtils.deleteDir(metadata.getParentDirectory());
 
