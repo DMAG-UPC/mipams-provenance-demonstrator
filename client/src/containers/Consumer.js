@@ -80,7 +80,7 @@ const Consumer = () => {
                 }
             });
         }
-    }, [uploadedFileName])
+    }, [uploadedFileName, auth.user.username])
 
     return (
         <ConsumerLayout

@@ -12,7 +12,7 @@ import org.mipams.fake_media.demo.entities.requests.FakeMediaRequest;
 import org.mipams.fake_media.entities.ClaimGenerator;
 import org.mipams.fake_media.entities.ProvenanceMetadata;
 import org.mipams.fake_media.entities.ProvenanceSigner;
-import org.mipams.fake_media.entities.UriReference;
+import org.mipams.fake_media.entities.HashedUriReference;
 import org.mipams.fake_media.entities.assertions.Assertion;
 import org.mipams.fake_media.entities.assertions.IngredientAssertion;
 import org.mipams.fake_media.entities.assertions.RedactableAssertion;
@@ -205,9 +205,9 @@ public class FakeMediaProducerService {
             String manifestUri = ProvenanceUtils
                     .getProvenanceJumbfURL(activeManifestId);
 
-            UriReference uriReference = new UriReference();
+            HashedUriReference uriReference = new HashedUriReference();
             uriReference.setUri(manifestUri);
-            uriReference.setAlgorithm(UriReference.SUPPORTED_HASH_ALGORITHM);
+            uriReference.setAlgorithm(HashedUriReference.SUPPORTED_HASH_ALGORITHM);
             uriReference.setDigest(uriReferenceService.getManifestSha256Digest(activeManifestJumbfBox));
 
             assertion.setManifestReference(uriReference);
@@ -289,9 +289,9 @@ public class FakeMediaProducerService {
                 String manifestUri = ProvenanceUtils
                         .getProvenanceJumbfURL(manifestJumbfBox.getDescriptionBox().getLabel());
 
-                UriReference uriReference = new UriReference();
+                HashedUriReference uriReference = new HashedUriReference();
                 uriReference.setUri(manifestUri);
-                uriReference.setAlgorithm(UriReference.SUPPORTED_HASH_ALGORITHM);
+                uriReference.setAlgorithm(HashedUriReference.SUPPORTED_HASH_ALGORITHM);
                 uriReference.setDigest(uriReferenceService.getManifestSha256Digest(manifestJumbfBox));
 
                 assertion.setManifestReference(uriReference);
