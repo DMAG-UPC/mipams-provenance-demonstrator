@@ -7,18 +7,18 @@ services:
     ports:
       - 8080:8080
     environment:
-      org_mipams_core_image_folder: "/app/assets"
-      org_mipams_core_max_file_size_in_bytes: 52428800
       spring_servlet_multipart_max-file-size: 128MB
       spring_servlet_multipart_max-request-size: 128MB
       spring_servlet_multipart_enabled: "true"
-      org_mipams_fake_media_demo_encSecret: "17bccfb498595c425c2833135315611f1abf1f58f507666f66761d43236bb384"
-      org_mipams_fake_media_demo_encScheme: "AES-256"
-      org_mipams_fake_media_demo_credentials_path: "/app/credentials"
-      org_mipams_fake_media_demo_exiftool_path: "/app/Image-ExifTool-12.42/exiftool"
-      org_mipams_fake_media_demo_provenance_path: "/app/generated"
-      org_mipams_fake_media_demo_claim_generator: "Mipams Generator v1.0"
-      org_mipams_fake_media: "DEBUG"
+      org_mipams_provenance_demo_encSecret: "17bccfb498595c425c2833135315611f1abf1f58f507666f66761d43236bb384"
+      org_mipams_provenance_demo_encScheme: "AES-256"
+      org_mipams_provenance_demo_credentials_path: "/app/credentials"
+      org_mipams_provenance_demo_exiftool_path: "/app/Image-ExifTool-12.57/exiftool"
+      org_mipams_provenance_demo_provenance_path: "/app/generated"
+      org_mipams_provenance_demo_claim_generator: "Mipams Generator v1.0"
+      org_mipams_provenance_demo_working_dir: "/app/assets"
+      org_mipams_provenance: "DEBUG"
+
   provenance-client:
     image: provenance-client:latest
     build:
@@ -32,24 +32,7 @@ services:
     depends_on:
       - provenance-server
     stdin_open: true
-  # demo-server:
-  #   image: demo-server:latest
+  # authorization-service:
+  #   image: authorization-service:latest
   #   ports:
-  #     - 8081:8080
-  #   environment:
-  #     org_mipams_core_image_folder: "/app/assets"
-  #     org_mipams_core.max_file_size_in_bytes: 52428800
-  #     spring_servlet_multipart_max-file-size: 128MB
-  #     spring_servlet_multipart_max-request-size: 128MB
-  # demo-client:
-  #   image: demo-client:latest
-  #   ports:
-  #     - 3000:3000
-  #   environment:
-  #     - CHOKIDAR_USEPOLLING=true
-  #   depends_on:
-  #     - demo-server
-  authorization-service:
-    image: authorization-service:latest
-    ports:
-      - 8083:8080
+  #     - 8083:8080

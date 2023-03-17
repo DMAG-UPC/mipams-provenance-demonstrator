@@ -9,7 +9,17 @@
 
 This is a demo application which offers graphical user interface (GUI) that allows authenticated users to embed provenance information to JPEG images. In addition both authenticated and non-authenticated users have the ability to consume provenance information by uploading a digital asset that they wish to inspect.
 
+It uses the latest Exit Tool application (https://www.exiftool.org/).
+
+This application uses a library to extend and handle data in custom JUMBF formats. The library is called MIPAMS FAKE MEDIA, it extends the MIPAMS JPEG Systems library and it can be found here: https://github.com/dmag-upc/mipams-fake-media
+
 ## Deploying <a name="deployment"></a>
+
+First, you need to build the server jar package. To do that, navigate to the server/ subdirectory and run 
+
+```
+mvn clean package
+```
 
 In order to develop/deploy the application you simply need to download the following tools:
 
@@ -19,8 +29,6 @@ In order to develop/deploy the application you simply need to download the follo
 Follow the instructions for your operation system. 
 
 In the docker subdirectory you may find the docker-compose.yml file that specifies the two services, namely provenance-server and provenance-client. 
-
-The MIPAMS authorization-service is also integrated. It is required that an authorization-service docker image build (**Instructions TBD**).
 
 To launch the application you need to execute the following command in the docker subdirectory:
 

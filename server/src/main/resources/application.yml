@@ -1,30 +1,19 @@
 spring:
   main:
     allow-circular-references: true
+    allow-bean-definition-overriding: true
   jwt:
     jwtSecret: igoApplication
     jwtExpirationMs: 86400000
-logging:
-  level:
-    org:
-      mipams:
-        jumbf:
-          core: DEBUG
-          privsec: INFO
-        fake_media:
-          - DEBUG
-          - demo: DEBUG
 
 org:
   mipams:
-    core:
-      max_file_size_in_bytes: 52428800 # Maximum size per file uploaded: 50 MB
-      image_folder: /home/nikos/Desktop/demo
-    fake_media:
+    provenance:
       demo:
         encSecret: "17bccfb498595c425c2833135315611f1abf1f58f507666f66761d43236bb384"
         encScheme: "AES-256"
-        credentials_path: /home/nikos/Desktop/demo
-        provenance_path: /home/nikos/demo/generated
-        exiftool_path: /home/nikos/Desktop/demo
+        credentials_path: 
+        provenance_path: 
+        exiftool_path:
+        working_dir:
         claim_generator: "Mipams Generator v1.0"
