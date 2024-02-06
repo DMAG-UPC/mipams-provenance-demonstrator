@@ -13,9 +13,9 @@ services:
       org_mipams_provenance_demo_encSecret: "17bccfb498595c425c2833135315611f1abf1f58f507666f66761d43236bb384"
       org_mipams_provenance_demo_encScheme: "AES-256"
       org_mipams_provenance_demo_credentials_path: "/app/credentials"
-      org_mipams_provenance_demo_exiftool_path: "/app/Image-ExifTool-12.57/exiftool"
+      org_mipams_provenance_demo_exiftool_path: "/app/Image-ExifTool-12.76/exiftool"
       org_mipams_provenance_demo_provenance_path: "/app/generated"
-      org_mipams_provenance_demo_claim_generator: "Mipams Generator v1.0"
+      org_mipams_provenance_demo_claim_generator: "Mipams Generator v2.0"
       org_mipams_provenance_demo_working_dir: "/app/assets"
       org_mipams_provenance: "DEBUG"
 

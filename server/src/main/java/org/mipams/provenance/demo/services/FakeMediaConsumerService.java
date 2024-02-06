@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 import org.mipams.jumbf.entities.BinaryDataBox;
 import org.mipams.jumbf.entities.JumbfBox;
@@ -20,8 +21,10 @@ import org.mipams.privsec.services.content_types.ProtectionContentType;
 import org.mipams.provenance.demo.entities.responses.ClaimResponse;
 import org.mipams.provenance.demo.entities.responses.FakeMediaResponse;
 import org.mipams.provenance.entities.assertions.Assertion;
+import org.mipams.provenance.entities.responses.DefaultManifestResponse;
 import org.mipams.provenance.entities.responses.ManifestResponse;
 import org.mipams.provenance.entities.responses.ManifestStoreResponse;
+import org.mipams.provenance.entities.responses.ProtectedManifestResponse;
 import org.mipams.provenance.services.AssertionFactory;
 import org.mipams.provenance.services.consumer.ClaimConsumer;
 import org.mipams.provenance.services.consumer.ManifestStoreConsumer;
@@ -77,8 +80,25 @@ public class FakeMediaConsumerService {
 
         if (fullInspection) {
             response = manifestStoreConsumer.consumeFullManifestStore(manifestStoreJumbfBox, strippedDigitalAssetUrl);
+
+            if(hasProtectedManifests(response) && userDetails != null) {
+                List<JumbfBox> manifests = manifestStoreJumbfBox.getContentBoxList().stream().map(box -> (JumbfBox) box).collect(Collectors.toList());
+                enforceAccessRulePolicyOnJumbfList(manifests, userDetails);
+                manifestStoreJumbfBox.getContentBoxList().clear();
+                manifestStoreJumbfBox.getContentBoxList().addAll(manifests);
+                response = manifestStoreConsumer.consumeFullManifestStore(manifestStoreJumbfBox, strippedDigitalAssetUrl);
+            }
+
         } else {
             response = manifestStoreConsumer.consumeActiveManifest(manifestStoreJumbfBox, strippedDigitalAssetUrl);
+
+            if(hasProtectedManifests(response) && userDetails != null) {
+                List<JumbfBox> manifests = manifestStoreJumbfBox.getContentBoxList().stream().map(box -> (JumbfBox) box).collect(Collectors.toList());
+                enforceAccessRulePolicyOnJumbfList(manifests, userDetails);
+                manifestStoreJumbfBox.getContentBoxList().clear();
+                manifestStoreJumbfBox.getContentBoxList().addAll(manifests);
+                response = manifestStoreConsumer.consumeActiveManifest(manifestStoreJumbfBox, strippedDigitalAssetUrl);    
+            }
         }
 
         if (userDetails != null) {
@@ -90,6 +110,10 @@ public class FakeMediaConsumerService {
         }
 
         return response;
+    }
+
+    private boolean hasProtectedManifests(ManifestStoreResponse mstore) {
+        return mstore.getManifestResponseMap().values().stream().filter(manifest -> manifest.getClass().getName().equals(ProtectedManifestResponse.class.getName())).count() > 0;
     }
 
     public JumbfBox locateManifestStoreJumbfBox(List<JumbfBox> boxList) {
@@ -119,37 +143,41 @@ public class FakeMediaConsumerService {
     private ManifestStoreResponse enforceAccessRulePolicy(ManifestStoreResponse protectedResponse,
             UserDetails userDetails) throws MipamsException {
 
-        ManifestStoreResponse finalResponse = new ManifestStoreResponse();
+        ManifestStoreResponse finalResponse = new ManifestStoreResponse();     
 
         for (String manifestId : protectedResponse.getManifestResponseMap().keySet()) {
 
-            ManifestResponse manifestResponse = new ManifestResponse(
-                    protectedResponse.getManifestResponseMap().get(manifestId));
+            ManifestResponse manifestResponse = protectedResponse.getManifestResponseMap().get(manifestId);
 
-            enforceAccessRulePolicyOnAssertionList(manifestResponse.getAssertionJumbfBoxList(), userDetails);
+            if(manifestResponse.getClass().getName().equals(ProtectedManifestResponse.class.getName())) {
+                continue;
+            }
+            
+            DefaultManifestResponse newManifestResponse = new DefaultManifestResponse((DefaultManifestResponse) manifestResponse);
 
-            finalResponse.getManifestResponseMap().put(manifestId, manifestResponse);
+            enforceAccessRulePolicyOnJumbfList(newManifestResponse.getAssertionJumbfBoxList(), userDetails);
+
+            finalResponse.getManifestResponseMap().put(manifestId, newManifestResponse);
         }
 
         return finalResponse;
     }
 
-    private void enforceAccessRulePolicyOnAssertionList(List<JumbfBox> assertionJumbfBoxList, UserDetails userDetails)
+    private void enforceAccessRulePolicyOnJumbfList(List<JumbfBox> jumbfBoxList, UserDetails userDetails)
             throws MipamsException {
-
-        for (JumbfBox assertionJumbfBox : new ArrayList<>(assertionJumbfBoxList)) {
-            if (assertionFactory.isJumbfBoxAnAssertion(assertionJumbfBox) && isProtectionBox(assertionJumbfBox)) {
-
+        
+        for (JumbfBox jumbfBox : new ArrayList<>(jumbfBoxList)) {
+            if (isProtectionBox(jumbfBox)) {
                 logger.info("Found a Protection Box");
 
-                ProtectionDescriptionBox dBox = (ProtectionDescriptionBox) assertionJumbfBox.getContentBoxList().get(0);
-                BinaryDataBox bDataBox = (BinaryDataBox) assertionJumbfBox.getContentBoxList().get(1);
+                ProtectionDescriptionBox dBox = (ProtectionDescriptionBox) jumbfBox.getContentBoxList().get(0);
+                BinaryDataBox bDataBox = (BinaryDataBox) jumbfBox.getContentBoxList().get(1);
 
                 if (dBox.accessRulesExist()) {
 
                     logger.info("Found Access Rules as well");
 
-                    JumbfBox arJumbfBox = CoreUtils.locateJumbfBoxFromLabel(assertionJumbfBoxList, dBox.getArLabel());
+                    JumbfBox arJumbfBox = CoreUtils.locateJumbfBoxFromLabel(jumbfBoxList, dBox.getArLabel());
 
                     try {
                         logger.info(encryptAssertionService.userHasAccessToResource(userDetails, arJumbfBox));
@@ -158,18 +186,18 @@ public class FakeMediaConsumerService {
                         continue;
                     } finally {
                         logger.info("Removing assertion Jumbf Box");
-                        assertionJumbfBoxList.remove(arJumbfBox);
+                        jumbfBoxList.remove(arJumbfBox);
                     }
                 }
 
                 logger.info("Access Granted. Decrypting assertion");
 
-                JumbfBox decryptedAssertionJumbfBox = encryptAssertionService.decrypt(dBox, bDataBox);
-                assertionJumbfBoxList.add(decryptedAssertionJumbfBox);
-                assertionJumbfBoxList.remove(assertionJumbfBox);
+                List<JumbfBox> decryptedAssertionJumbfBoxes = encryptAssertionService.decrypt(dBox, bDataBox);
+                
+                jumbfBoxList.addAll(0, decryptedAssertionJumbfBoxes);
+                jumbfBoxList.remove(jumbfBox);
             }
         }
-
     }
 
     public FakeMediaResponse getFakeMediaResponseForManifest(String manifestId, ManifestResponse manifestResponse)
@@ -178,15 +206,20 @@ public class FakeMediaConsumerService {
 
         response.setManifestId(manifestId);
 
-        List<Assertion> assertionList = getAssertionListFromJumbfBoxList(manifestResponse.getAssertionJumbfBoxList());
-        response.setAssertionList(assertionList);
+        if(manifestResponse.getClass().getName().equals(ProtectedManifestResponse.class.getName())) {
+            response.setManifestProtected(true);
+        } else {
+            DefaultManifestResponse defaultManifestResponse = (DefaultManifestResponse) manifestResponse;
+            List<Assertion> assertionList = getAssertionListFromJumbfBoxList(defaultManifestResponse.getAssertionJumbfBoxList());
+            response.setAssertionList(assertionList);
 
-        List<String> inaccessibleJumbfBoxLabelList = getProtectionBoxLabelList(
-                manifestResponse.getAssertionJumbfBoxList());
+            List<String> inaccessibleJumbfBoxLabelList = getProtectionBoxLabelList(
+                defaultManifestResponse.getAssertionJumbfBoxList());
 
-        ClaimResponse claimResponse = generateClaimResponse(manifestResponse);
-        response.setClaimResponse(claimResponse);
-        response.setInaccessibleJumbfBoxLabelList(inaccessibleJumbfBoxLabelList);
+            ClaimResponse claimResponse = generateClaimResponse(defaultManifestResponse);
+            response.setClaimResponse(claimResponse);
+            response.setInaccessibleJumbfBoxLabelList(inaccessibleJumbfBoxLabelList);
+        }
 
         return response;
     }
@@ -207,9 +240,7 @@ public class FakeMediaConsumerService {
     }
 
     private boolean isProtectionBox(JumbfBox assertionJumbfBox) {
-        ProtectionContentType protectionContentType = new ProtectionContentType();
-        return assertionJumbfBox.getDescriptionBox().getUuid()
-                .equalsIgnoreCase(protectionContentType.getContentTypeUuid());
+        return (new ProtectionContentType()).getContentTypeUuid().equalsIgnoreCase(assertionJumbfBox.getDescriptionBox().getUuid());
     }
 
     private List<String> getProtectionBoxLabelList(List<JumbfBox> assertionJumbfBoxList) throws MipamsException {
@@ -224,7 +255,7 @@ public class FakeMediaConsumerService {
         return result;
     }
 
-    private ClaimResponse generateClaimResponse(ManifestResponse manifestResponse)
+    private ClaimResponse generateClaimResponse(DefaultManifestResponse manifestResponse)
             throws MipamsException {
 
         ClaimResponse claimResponse = new ClaimResponse();
@@ -243,11 +274,11 @@ public class FakeMediaConsumerService {
         try {
             X509Certificate cert = credentialsReaderService.getCertificate(new ByteArrayInputStream(claimCertificate));
 
-            if (cert.getIssuerDN() == null) {
+            if (cert.getIssuerX500Principal() == null) {
                 throw new MipamsException("Certificate Issuer Not found");
             }
 
-            return cert.getIssuerDN().getName();
+            return cert.getIssuerX500Principal().getName();
         } catch (CryptoException e) {
             throw new MipamsException(e);
         }

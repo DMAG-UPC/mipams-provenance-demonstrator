@@ -1,7 +1,7 @@
 FROM adoptopenjdk/openjdk11:debian-slim
 
 ARG JAR_FILE=target/demo-1.0.jar
-ARG EXIT_TOOL_DOWNLOAD=https://www.exiftool.org/Image-ExifTool-12.57.tar.gz
+ARG EXIF_TOOL_DOWNLOAD=https://www.exiftool.org/Image-ExifTool-12.76.tar.gz
 
 RUN groupadd mipams && useradd -g mipams -s /bin/bash mipams
 
@@ -21,9 +21,9 @@ COPY ./generateCredentials.sh /app/credentials/generateCredentials.sh
 RUN chown -R mipams:mipams /app/credentials
 RUN chmod +x /app/credentials/generateCredentials.sh
 
-RUN wget ${EXIT_TOOL_DOWNLOAD}
-RUN tar -xzf /app/Image-ExifTool-12.57.tar.gz && rm /app/Image-ExifTool-12.57.tar.gz
-RUN chown -R mipams:mipams /app/Image-ExifTool-12.57
+RUN wget ${EXIF_TOOL_DOWNLOAD} -O /app/exiftool.tar.gz
+RUN tar -xzf /app/exiftool.tar.gz && rm /app/exiftool.tar.gz
+RUN chown -R mipams:mipams /app/Image-ExifTool-12.76
 
 USER mipams:mipams
 VOLUME /tmp

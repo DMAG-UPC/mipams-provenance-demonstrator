@@ -1,7 +1,6 @@
 package org.mipams.provenance.demo;
 
 import org.junit.jupiter.api.Test;
-import org.mipams.provenance.demo.DemoApplication;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 

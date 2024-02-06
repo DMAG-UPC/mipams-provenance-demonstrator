@@ -3,6 +3,7 @@ package org.mipams.provenance.demo.services;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.List;
 
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
@@ -54,7 +55,12 @@ public class EncryptAssertionService {
     public JumbfBox encrypt(RedactableAssertion assertion, String arJumbfBoxLabel,
             ProvenanceMetadata provenanceMetadata) throws MipamsException {
 
-        final String assertionLabel = assertionFactory.getBaseLabel(assertion);
+        JumbfBox assertionJumbfBox = assertionFactory.convertAssertionToJumbfBox(assertion, provenanceMetadata);
+        return encrypt(List.of(assertionJumbfBox), assertionJumbfBox.getDescriptionBox().getLabel(), arJumbfBoxLabel, provenanceMetadata);
+    }
+
+    public JumbfBox encrypt(List<JumbfBox> jumbfBoxes, String protectionBoxLabel, String arJumbfBoxLabel, ProvenanceMetadata provenanceMetadata) throws MipamsException {
+
         final int ivSizeInBytes = 16;
 
         String outputFileUrl = null;
@@ -62,13 +68,11 @@ public class EncryptAssertionService {
             byte[] iv = cryptoService.getRandomNumber(ivSizeInBytes);
             String ivAsHex = CoreUtils.convertByteArrayToHex(iv);
 
-            JumbfBox assertionJumbfBox = assertionFactory.convertAssertionToJumbfBox(assertion, provenanceMetadata);
-
-            outputFileUrl = writeJumbfBoxToAFile(assertionJumbfBox, provenanceMetadata);
+            outputFileUrl = writeJumbfBoxToAFile(jumbfBoxes, provenanceMetadata);
 
             String encryptedContentUrl = encryptFileContent(ivAsHex, outputFileUrl);
 
-            JumbfBox protectionJumbfBox = buildProtectionBox(iv, assertionLabel, arJumbfBoxLabel, encryptedContentUrl);
+            JumbfBox protectionJumbfBox = buildProtectionBox(iv, protectionBoxLabel, arJumbfBoxLabel, encryptedContentUrl);
 
             return protectionJumbfBox;
         } catch (CryptoException e) {
@@ -78,9 +82,12 @@ public class EncryptAssertionService {
                 CoreUtils.deleteFile(outputFileUrl);
             }
         }
+
+
+
     }
 
-    private String writeJumbfBoxToAFile(JumbfBox assertionJumbfBox, ProvenanceMetadata provenanceMetadata)
+    private String writeJumbfBoxToAFile(List<JumbfBox> jumbfBoxes, ProvenanceMetadata provenanceMetadata)
             throws MipamsException {
 
         String jumbfBoxFileName = CoreUtils.randomStringGenerator();
@@ -88,7 +95,9 @@ public class EncryptAssertionService {
                 jumbfBoxFileName);
 
         try (OutputStream fos = new FileOutputStream(jumbfBoxFilePath)) {
-            jumbfBoxService.writeToJumbfFile(assertionJumbfBox, fos);
+            for(JumbfBox jumbfBox: jumbfBoxes){
+                jumbfBoxService.writeToJumbfFile(jumbfBox, fos);
+            }
         } catch (IOException e) {
             throw new MipamsException(ProvenanceErrorMessages.JUMBF_BOX_CREATION_ERROR, e);
         }
@@ -136,7 +145,7 @@ public class EncryptAssertionService {
         return builder.getResult();
     }
 
-    public JumbfBox decrypt(ProtectionDescriptionBox pdBox, BinaryDataBox bdBox) throws MipamsException {
+    public List<JumbfBox> decrypt(ProtectionDescriptionBox pdBox, BinaryDataBox bdBox) throws MipamsException {
         try {
             if (!pdBox.isAes256CbcWithIvProtection()) {
                 throw new MipamsException(ProvenanceErrorMessages.UNSUPPORTED_ENCRYPTION);
@@ -149,7 +158,7 @@ public class EncryptAssertionService {
 
             String outputFileUrl = cryptoService.decryptDocument(getSecretKey(), decryptionRequest);
 
-            JumbfBox decryptedJumbfBox = coreParserService.parseMetadataFromFile(outputFileUrl).get(0);
+            List<JumbfBox> decryptedJumbfBox = coreParserService.parseMetadataFromFile(outputFileUrl);
             return decryptedJumbfBox;
         } catch (CryptoException e) {
             throw new MipamsException(e);

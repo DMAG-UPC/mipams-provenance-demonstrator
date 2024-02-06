@@ -27,7 +27,7 @@ const AssertionView = (props) => {
         } else if (Boolean(assertion.exifMetadata)) {
             return getExifMetadataListItem(assertion);
         } else if (Boolean(assertion.algorithm)) {
-            return <Typography> The checksum of the digital asset is copmuted using {assertion.algorithm} </Typography>
+            return <Typography> The checksum of the digital asset is computed using {assertion.algorithm} </Typography>
         } else if (Boolean(assertion.relationship) && assertion.relationship === "parentOf") {
             return getParentRelationshipListItem(assertion);
         } else if (isAssertionLabel(assertion)) {

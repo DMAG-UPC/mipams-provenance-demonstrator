@@ -3,6 +3,7 @@ import React from 'react'
 import { Accordion, AccordionDetails, AccordionSummary, Divider, Stack, Tooltip, Typography } from '@mui/material'
 import StarRateIcon from '@mui/icons-material/StarRate';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import BlockIcon from '@mui/icons-material/Block';
 import styled from '@emotion/styled';
 import { Box } from '@mui/system';
 
@@ -30,7 +31,7 @@ const ManifestView = (props) => {
 
     var assertionListElement = info.assertionList && <AssertionView assertionList={[...info.assertionList, ...info.inaccessibleJumbfBoxLabelList]} />;
 
-    var claimElement = <StyledBox>
+    var claimElement = !info.manifestProtected && <StyledBox>
         <Typography >
             <b>Signed by:</b> {getOrganizationUnit(info.claimResponse.signedBy)}
         </Typography>
@@ -41,9 +42,9 @@ const ManifestView = (props) => {
 
 
     return (
-        <Accordion>
+        <Accordion disabled={info.manifestProtected}>
             <AccordionSummary
-                expandIcon={<ExpandMoreIcon />}
+                expandIcon={info.manifestProtected ? <BlockIcon />: <ExpandMoreIcon />}
                 aria-controls="panel1a-content"
                 id="panel1a-header"
             >

@@ -7,6 +7,7 @@ import java.security.PublicKey;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.mipams.jumbf.entities.BmffBox;
 import org.mipams.jumbf.entities.JumbfBox;
@@ -113,8 +114,10 @@ public class FakeMediaProducerService {
                 CoreUtils.randomStringGenerator());
         metadata.setParentDirectory(tempWorkingDir);
 
+        List<JumbfBox> manifestStoreContentBoxes = new ArrayList<>();
+
         List<JumbfBox> assertionJumbfBoxList = calculateAssertionJumbfBoxList(userDetails, manifestStoreJumbfBox,
-                fakeMediaRequest, metadata);
+                fakeMediaRequest, manifestStoreContentBoxes, metadata);
 
         ProvenanceSigner signer = getProvenanceSigner(userDetails);
         ProducerRequestBuilder requestBuilder = new ProducerRequestBuilder(fakeMediaRequest.getModifiedAssetUrl());
@@ -129,6 +132,8 @@ public class FakeMediaProducerService {
         requestBuilder.setAssertionList(assertionJumbfBoxList);
 
         JumbfBox newManifestStoreJumbfBox = manifestStoreProducer.createManifestStore(requestBuilder.getResult());
+
+        newManifestStoreJumbfBox.getContentBoxList().addAll(manifestStoreContentBoxes);
 
         if (fakeMediaRequest.getRedactedAssertionUriList() != null
                 && !fakeMediaRequest.getRedactedAssertionUriList().isEmpty()) {
@@ -149,7 +154,7 @@ public class FakeMediaProducerService {
     }
 
     private List<JumbfBox> calculateAssertionJumbfBoxList(UserDetails userDetails, JumbfBox currentManifestStore,
-            FakeMediaRequest fakeMediaRequest, ProvenanceMetadata metadata) throws MipamsException {
+            FakeMediaRequest fakeMediaRequest, List<JumbfBox> jumbfBoxesToBeIncludedInManifestStore, ProvenanceMetadata metadata) throws MipamsException {
 
         List<JumbfBox> assertionJumbfBoxList = new ArrayList<>();
         String assetUrl = fakeMediaRequest.getAssetUrl();
@@ -160,7 +165,7 @@ public class FakeMediaProducerService {
 
         verifyRedactionRequest(currentManifestStore, fakeMediaRequest.getRedactedAssertionUriList());
 
-        appendComponentIngredientManifestIfRequired(assetUrl, assertionJumbfBoxList,
+        appendComponentIngredientManifestIfRequired(jumbfBoxesToBeIncludedInManifestStore, assertionJumbfBoxList,
                 fakeMediaRequest.getComponentIngredientUriList(), metadata);
 
         appendEncryptedAssertionJumbfBoxes(assertionJumbfBoxList, fakeMediaRequest.getEncryptionAssertionList(),
@@ -185,7 +190,7 @@ public class FakeMediaProducerService {
     }
 
     private void appendParentIngredientAssertion(String assetUrl, List<JumbfBox> assertionJumbfBoxList,
-            JumbfBox currentManifestStore, ProvenanceMetadata metadata) throws MipamsException {
+            JumbfBox currentManifestStore,ProvenanceMetadata metadata) throws MipamsException {
 
         if (currentManifestStore == null) {
             return;
@@ -207,7 +212,13 @@ public class FakeMediaProducerService {
             HashedUriReference uriReference = new HashedUriReference();
             uriReference.setUri(manifestUri);
             uriReference.setAlgorithm(HashedUriReference.SUPPORTED_HASH_ALGORITHM);
+            
+            List<JumbfBox> currentManifestList = currentManifestStore.getContentBoxList().stream().map(box -> (JumbfBox) box).collect(Collectors.toList());
+            JumbfBox ingredientProtectionBox = encryptAssertionService.encrypt(currentManifestList, activeManifestId, null, metadata);
+
             uriReference.setDigest(uriReferenceService.getManifestSha256Digest(activeManifestJumbfBox));
+            currentManifestStore.getContentBoxList().clear();
+            currentManifestStore.getContentBoxList().add(ingredientProtectionBox);
 
             assertion.setManifestReference(uriReference);
 
@@ -261,7 +272,7 @@ public class FakeMediaProducerService {
         }
     }
 
-    private void appendComponentIngredientManifestIfRequired(String assetUrl, List<JumbfBox> assertionJumbfBoxList,
+    private void appendComponentIngredientManifestIfRequired(List<JumbfBox> jumbfBoxesToBeIncludedInManifestStore, List<JumbfBox> assertionJumbfBoxList,
             List<String> componentIngredientUriList, ProvenanceMetadata metadata) throws MipamsException {
 
         for (String componentUrl : componentIngredientUriList) {
@@ -291,9 +302,15 @@ public class FakeMediaProducerService {
                 HashedUriReference uriReference = new HashedUriReference();
                 uriReference.setUri(manifestUri);
                 uriReference.setAlgorithm(HashedUriReference.SUPPORTED_HASH_ALGORITHM);
-                uriReference.setDigest(uriReferenceService.getManifestSha256Digest(manifestJumbfBox));
+
+                List<JumbfBox> ingredientManifests = manifestStore.getContentBoxList().stream().map(manifest -> (JumbfBox) manifest).collect(Collectors.toList()); 
+                JumbfBox ingredientProtectionBox = encryptAssertionService.encrypt(ingredientManifests, manifestJumbfBox.getDescriptionBox().getLabel(), null, metadata);
+
+                uriReference.setDigest(uriReferenceService.getManifestSha256Digest(ingredientProtectionBox));
 
                 assertion.setManifestReference(uriReference);
+
+                jumbfBoxesToBeIncludedInManifestStore.add(ingredientProtectionBox);
             }
 
             JumbfBox assertionJumbfBox = assertionFactory.convertAssertionToJumbfBox(assertion, metadata);

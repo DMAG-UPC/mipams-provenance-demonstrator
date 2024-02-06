@@ -13,6 +13,7 @@ import lombok.ToString;
 @NoArgsConstructor
 public class FakeMediaResponse {
     private @Getter @Setter String manifestId;
+    private @Getter @Setter boolean isManifestProtected = false;
     private @Getter @Setter List<Assertion> assertionList;
     private @Getter @Setter ClaimResponse claimResponse;
     private @Getter @Setter List<String> inaccessibleJumbfBoxLabelList;
